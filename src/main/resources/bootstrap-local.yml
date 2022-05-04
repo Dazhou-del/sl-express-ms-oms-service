@@ -1,0 +1,29 @@
+server:
+  port: 18083
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+spring:
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      server-addr: 127.0.0.1:8848
+      discovery:
+        namespace: ecae68ba-7b43-4473-a980-4ddeb6157bdc
+      config:
+        namespace: ecae68ba-7b43-4473-a980-4ddeb6157bdc
+  datasource: #数据库的配置
+    driver-class-name: ${jdbc.driver}
+    url: ${jdbc.url}
+    username: ${jdbc.username}
+    password: ${jdbc.password}
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
