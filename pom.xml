@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>com.sl-express.ms.oms</groupId>
-    <artifactId>sl-express-ms-oms</artifactId>
+    <artifactId>sl-express-ms-oms-service</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
