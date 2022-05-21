@@ -111,7 +111,7 @@ public class OrderController {
 
         return PageResponse.<OrderDTO>builder()
                 .items(dtoList)
-                .pagesize(orderDTO.getPageSize())
+                .pageSize(orderDTO.getPageSize())
                 .page(orderDTO.getPage())
                 .counts(orderIPage.getTotal())
                 .pages(orderIPage.getPages()).build();
@@ -157,7 +157,7 @@ public class OrderController {
 
         return PageResponse.<OrderDTO>builder()
                 .items(dtoList)
-                .pagesize(orderSearchDTO.getPageSize())
+                .pageSize(orderSearchDTO.getPageSize())
                 .page(orderSearchDTO.getPage()).counts(orderIPage.getTotal())
                 .pages(orderIPage.getPages()).build();
     }
