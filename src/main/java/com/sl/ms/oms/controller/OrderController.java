@@ -19,7 +19,6 @@ import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
