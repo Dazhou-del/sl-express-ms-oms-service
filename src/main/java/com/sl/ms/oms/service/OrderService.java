@@ -3,6 +3,7 @@ package com.sl.ms.oms.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 
 import java.util.List;
@@ -16,9 +17,10 @@ public interface OrderService extends IService<OrderEntity> {
      * 新增订单
      *
      * @param order 订单信息
+     * @param orderCargo
      * @return 订单信息
      */
-    OrderEntity saveOrder(OrderEntity order);
+    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo);
 
     /**
      * 获取订单分页数据

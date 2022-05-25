@@ -2,6 +2,7 @@ package com.sl.ms.oms.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,16 +12,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.sl.ms.oms.dto.OrderDTO;
 import com.sl.ms.oms.dto.OrderLocationDto;
 import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * 订单  前端控制器
  */
-@Log4j2
+@Slf4j
 @RestController
 @RequestMapping("order")
 public class OrderController {
@@ -48,14 +50,16 @@ public class OrderController {
      * @return 订单信息
      */
     @PostMapping
-    public OrderDTO save(@RequestBody OrderDTO orderDTO, HttpServletResponse res) {
+    public OrderDTO save(@RequestBody OrderDTO orderDTO) {
         log.info("保存订单信息:{}", JSONUtil.toJsonStr(orderDTO));
         OrderEntity order = new OrderEntity();
         //TODO 预计到达时间
         order.setEstimatedArrivalTime(LocalDateTime.now().plus(2, ChronoUnit.DAYS));
         //TODO 需要计算距离和运费
         order.setAmount(BigDecimal.valueOf(20));
-        orderService.saveOrder(order);
+        BeanUtil.copyProperties(orderDTO, order);
+        OrderCargoEntity orderCargo = BeanUtil.toBean(orderDTO.getOrderCargoDto(), OrderCargoEntity.class);
+        orderService.saveOrder(order, orderCargo);
         log.info("订单信息入库:{}", order);
         return BeanUtil.toBean(order, OrderDTO.class);
     }
@@ -177,9 +181,9 @@ public class OrderController {
     @PostMapping("location/saveOrUpdate")
     public OrderLocationDto saveOrUpdateLocation(@RequestBody OrderLocationDto orderLocationDto) {
         try {
-            String id = orderLocationDto.getId();
-            String orderId = orderLocationDto.getOrderId();
-            if (StrUtil.isNotBlank(id)) {
+            Long id = orderLocationDto.getId();
+            Long orderId = orderLocationDto.getOrderId();
+            if (ObjectUtil.isNotEmpty(id)) {
                 QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
                         .eq("order_id", orderId).last(" limit 1");
                 OrderLocationEntity location = orderLocationService.getBaseMapper()
@@ -217,8 +221,8 @@ public class OrderController {
 
     @PostMapping("del")
     public int deleteOrderLocation(@RequestBody OrderLocationDto orderLocationDto) {
-        String orderId = orderLocationDto.getOrderId();
-        if (StrUtil.isNotBlank(orderId)) {
+        Long orderId = orderLocationDto.getOrderId();
+        if (ObjectUtil.isNotEmpty(orderId)) {
             UpdateWrapper<OrderLocationEntity> updateWrapper = new UpdateWrapper<OrderLocationEntity>()
                     .eq("order_id", orderLocationDto);
             return orderLocationService.getBaseMapper().delete(updateWrapper);

@@ -1,23 +1,33 @@
 package com.sl.ms.oms.service.impl;
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.ms.oms.enums.OrderPickupType;
 import com.sl.ms.oms.enums.OrderStatus;
 import com.sl.ms.oms.mapper.OrderMapper;
+import com.sl.ms.oms.service.MQService;
+import com.sl.ms.oms.service.OrderCargoService;
 import com.sl.ms.oms.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单  服务实现类
@@ -26,8 +36,19 @@ import java.util.List;
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
 
+
+    @Value("${rabbitmq.OrderStatus.exchange}")
+    private String rabbitmqOrderStatusExchange;
+
+    @Autowired
+    private OrderCargoService orderCargoService;
+
+    @Resource
+    private MQService mqService;
+
+    @Transactional
     @Override
-    public OrderEntity saveOrder(OrderEntity order) {
+    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo) {
         order.setCreateTime(LocalDateTime.now());
         order.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());
         if (OrderPickupType.NO_PICKUP.getCode().equals(order.getPickupType())) {
@@ -35,8 +56,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         } else {
             order.setStatus(OrderStatus.PENDING.getCode());
         }
+        // 保存订单
         save(order);
+        // 保存货物
+        orderCargoService.saveSelective(orderCargo);
+        // 生成订单mq
+        noticeOrderStatusChange(order);
         return order;
+    }
+
+    private void noticeOrderStatusChange(OrderEntity orderEntity) {
+        //{"order":{}, "created":123456}
+        Map<Object, Object> msg = MapUtil.builder()
+                .put("order", JSONUtil.toJsonStr(orderEntity))
+                .put("created", System.currentTimeMillis()).build();
+        //发送消息
+        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, msg);
     }
 
     @Override
