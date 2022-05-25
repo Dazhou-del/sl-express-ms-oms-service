@@ -56,11 +56,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         } else {
             order.setStatus(OrderStatus.PENDING.getCode());
         }
+        // 根据发收件人地址获取起止机构ID TODO 调用机构范围微服务
         // 保存订单
         save(order);
         // 保存货物
         orderCargoService.saveSelective(orderCargo);
-        // 生成订单mq
+        // 生成订单mq 调度服务用来调度 之后快递员服务处理
         noticeOrderStatusChange(order);
         return order;
     }
