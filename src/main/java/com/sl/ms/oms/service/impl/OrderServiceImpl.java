@@ -81,8 +81,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
-
+        if (ObjectUtil.isEmpty(orderLocation)) {
+            return null;
+        }
         // 计算运费 距离 设置当前机构ID
+        assert orderLocation != null;
         appendOtherInfo(order, orderLocation.getSendAgentId());
 
         // 货物
@@ -301,11 +304,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     private OrderLocationEntity buildOrderLocation(OrderEntity order) {
         String address = senderFullAddress(order);
         Result result = getAgencyId(address);
+        if (ObjectUtil.isEmpty(result)) {
+            return null;
+        }
         String agencyId = result.get("agencyId").toString();
         String sendLocation = result.get("location").toString();
 
         String receiverAddress = receiverFullAddress(order);
         Result resultReceive = getAgencyId(receiverAddress);
+        if (ObjectUtil.isEmpty(resultReceive)) {
+            return null;
+        }
         String receiveAgencyId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
