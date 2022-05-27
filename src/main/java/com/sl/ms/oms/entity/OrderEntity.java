@@ -115,7 +115,7 @@ public class OrderEntity extends BaseEntity {
     /**
      * 当前所在网点
      */
-    private String currentAgencyId;
+    private Long currentAgencyId;
 
     /**
      * 付款方式,1.预结2到付

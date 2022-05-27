@@ -9,12 +9,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sl.ms.oms.dto.OrderSearchDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
+import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.ms.oms.enums.OrderPickupType;
 import com.sl.ms.oms.enums.OrderStatus;
 import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderCargoService;
+import com.sl.ms.oms.service.OrderLocationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +35,12 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     @Autowired
     private OrderCargoService orderCargoService;
 
+    @Autowired
+    private OrderLocationService orderLocationService;
+
     @Transactional
     @Override
-    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo) {
+    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) {
         order.setCreateTime(LocalDateTime.now());
         order.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());
         if (OrderPickupType.NO_PICKUP.getCode().equals(order.getPickupType())) {
@@ -46,7 +51,11 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         // 保存订单
         if (save(order)) {
             // 保存货物
+            orderCargo.setOrderId(order.getId());
             orderCargoService.saveSelective(orderCargo);
+            // 保存位置
+            orderLocation.setOrderId(order.getId());
+            orderLocationService.save(orderLocation);
             return order;
         }
         return null;

@@ -16,7 +16,7 @@ public class OrderLocationEntity extends BaseEntity {
     /**
      * 订单id
      */
-    private String orderId;
+    private Long orderId;
     /**
      * 发送地址坐标
      */
@@ -28,12 +28,12 @@ public class OrderLocationEntity extends BaseEntity {
     /**
      * 发送起始网点
      */
-    private String sendAgentId;
+    private Long sendAgentId;
 
     /**
      * 接受的终止网点
      */
-    private String receiveAgentId;
+    private Long receiveAgentId;
     /**
      * 记录状态 0：无效，1有效
      */

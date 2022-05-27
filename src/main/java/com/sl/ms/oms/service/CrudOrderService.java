@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.sl.ms.oms.dto.OrderSearchDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
+import com.sl.ms.oms.entity.OrderLocationEntity;
 
 import java.util.List;
 
@@ -15,9 +16,10 @@ public interface CrudOrderService extends IService<OrderEntity> {
      *
      * @param order 订单信息
      * @param orderCargo
+     * @param orderLocation
      * @return 订单信息
      */
-    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo);
+    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation);
 
     /**
      * 获取订单分页数据
