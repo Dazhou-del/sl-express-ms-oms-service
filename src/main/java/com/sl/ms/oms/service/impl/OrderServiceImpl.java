@@ -49,7 +49,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Autowired
     private MQService mqService;
 
-    @Resource
+    @Autowired
     private AddressBookFeign addressBookFeign;
 
     @Autowired
