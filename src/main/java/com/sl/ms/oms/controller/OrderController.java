@@ -9,12 +9,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.dto.OrderDTO;
 import com.sl.ms.oms.dto.OrderLocationDto;
 import com.sl.ms.oms.dto.OrderSearchDTO;
-import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
@@ -22,9 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,24 +40,19 @@ public class OrderController {
     @Resource
     private OrderLocationService orderLocationService;
 
+    @Resource
+    private CrudOrderService crudOrderService;
+
     /**
-     * 新增订单
+     * 下单
      *
-     * @param orderDTO 订单信息
+     * @param mailingSaveDTO 订单信息
      * @return 订单信息
      */
     @PostMapping
-    public OrderDTO save(@RequestBody OrderDTO orderDTO) {
-        log.info("保存订单信息:{}", JSONUtil.toJsonStr(orderDTO));
-        OrderEntity order = new OrderEntity();
-        //TODO 预计到达时间
-        order.setEstimatedArrivalTime(LocalDateTime.now().plus(2, ChronoUnit.DAYS));
-        //TODO 需要计算距离和运费
-        order.setAmount(BigDecimal.valueOf(20));
-        BeanUtil.copyProperties(orderDTO, order);
-        OrderCargoEntity orderCargo = BeanUtil.toBean(orderDTO.getOrderCargoDto(), OrderCargoEntity.class);
-        orderService.saveOrder(order, orderCargo);
-        log.info("订单信息入库:{}", order);
+    public OrderDTO mailingSave(@RequestBody MailingSaveDTO mailingSaveDTO) {
+        log.info("保存订单信息:{}", JSONUtil.toJsonStr(mailingSaveDTO));
+        OrderEntity order = orderService.mailingSave(mailingSaveDTO);
         return BeanUtil.toBean(order, OrderDTO.class);
     }
 
@@ -106,7 +99,7 @@ public class OrderController {
     @PostMapping("/page")
     public PageResponse<OrderDTO> findByPage(@RequestBody OrderDTO orderDTO) {
         OrderEntity orderEntity = BeanUtil.toBean(orderDTO, OrderEntity.class);
-        IPage<OrderEntity> orderIPage = orderService.findByPage(orderDTO.getPage(), orderDTO.getPageSize(), orderEntity);
+        IPage<OrderEntity> orderIPage = crudOrderService.findByPage(orderDTO.getPage(), orderDTO.getPageSize(), orderEntity);
         List<OrderDTO> dtoList = new ArrayList<>();
         orderIPage.getRecords().forEach(order -> {
             dtoList.add(BeanUtil.toBean(order, OrderDTO.class));
@@ -152,7 +145,7 @@ public class OrderController {
     @RequestMapping(value = "pageLikeForCustomer", method = RequestMethod.POST)
     public PageResponse<OrderDTO> pageLikeForCustomer(@RequestBody OrderSearchDTO orderSearchDTO) {
         //查询结果
-        IPage<OrderEntity> orderIPage = orderService.pageLikeForCustomer(orderSearchDTO);
+        IPage<OrderEntity> orderIPage = crudOrderService.pageLikeForCustomer(orderSearchDTO);
         List<OrderDTO> dtoList = new ArrayList<>();
         orderIPage.getRecords().forEach(order -> {
             dtoList.add(BeanUtil.toBean(order, OrderDTO.class));

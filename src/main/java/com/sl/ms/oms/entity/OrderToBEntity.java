@@ -3,7 +3,6 @@ package com.sl.ms.oms.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sl.transport.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -15,9 +14,11 @@ import java.time.LocalDateTime;
  * 订单状态
  */
 @Data
-@Builder
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+@TableName("sl_order_to_b")
 @ApiModel
-public class OrderEntity extends BaseEntity {
+public class OrderToBEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,7 +66,7 @@ public class OrderEntity extends BaseEntity {
     /**
      * 收件人地址Id
      */
-    private Long receiverAddressId;
+    private String receiverAddressId;
 
     /**
      * 收件人姓名
@@ -100,7 +101,7 @@ public class OrderEntity extends BaseEntity {
     /**
      * 发件人地址Id
      */
-    private Long senderAddressId;
+    private String senderAddressId;
 
     /**
      * 发件人姓名

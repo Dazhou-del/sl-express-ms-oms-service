@@ -19,6 +19,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <sl-express-common.version>1.0-SNAPSHOT</sl-express-common.version>
+        <sl-express-ms-user-api.version>1.0-SNAPSHOT</sl-express-ms-user-api.version>
     </properties>
 
     <dependencies>
@@ -31,6 +32,11 @@
             <groupId>com.sl-express.ms.oms</groupId>
             <artifactId>sl-express-ms-oms-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sl-express.ms.user</groupId>
+            <artifactId>sl-express-ms-user-api</artifactId>
+            <version>${sl-express-ms-user-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
