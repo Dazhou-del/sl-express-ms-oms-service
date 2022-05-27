@@ -217,14 +217,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         log.info("循环计算包含发件地址的网点:{}  {}", location, agencyScopes);
         try {
             for (AgencyScopeDto agencyScopeDto : agencyScopes) {
-                List<List<Map>> mutiPoints = agencyScopeDto.getMultiPoints();
-                for (List<Map> list : mutiPoints) {
+                List<List<Map<String, String>>> mutiPoints = agencyScopeDto.getMultiPoints();
+                for (List<Map<String, String>> list : mutiPoints) {
                     String[] originArray = location.split(",");
                     boolean flag = EntCoordSyncJob.isPoint(list, Double.parseDouble(originArray[0]), Double.parseDouble(originArray[1]));
                     if (flag) {
                         log.info("找到包含发件地址的网点:  {}", agencyScopeDto.getAgencyId());
                         return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
                     }
+                    return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
                 }
             }
         } catch (Exception e) {

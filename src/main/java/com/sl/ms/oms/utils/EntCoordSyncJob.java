@@ -265,7 +265,7 @@ public class EntCoordSyncJob {
      * @param latitude  纬度
      * @return 返回true跟false
      */
-    public static boolean isPoint(List<Map> polygon, double longitude, double latitude) {
+    public static boolean isPoint(List<Map<String, String>> polygon, double longitude, double latitude) {
 
         Path2D.Double generalPath = new Path2D.Double();
 

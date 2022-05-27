@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @ApiModel
+@TableName("sl_order")
 public class OrderEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
