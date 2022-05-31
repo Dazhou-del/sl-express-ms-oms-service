@@ -5,8 +5,6 @@ import com.sl.transport.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
