@@ -19,6 +19,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <sl-express-common.version>1.0-SNAPSHOT</sl-express-common.version>
+        <sl-express-mq.version>1.0-SNAPSHOT</sl-express-mq.version>
         <sl-express-ms-user-api.version>1.0-SNAPSHOT</sl-express-ms-user-api.version>
     </properties>
 
@@ -98,6 +99,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sl-express.ms.mq</groupId>
+            <artifactId>sl-express-ms-mq-service</artifactId>
+            <version>${sl-express-mq.version}</version>
         </dependency>
     </dependencies>
 
