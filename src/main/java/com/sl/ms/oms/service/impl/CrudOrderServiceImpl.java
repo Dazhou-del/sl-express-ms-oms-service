@@ -131,7 +131,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         LambdaQueryWrapper<OrderEntity> orderQueryWrapper = new LambdaQueryWrapper<>();
         orderQueryWrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getId()), OrderEntity::getId, orderSearchDTO.getId());
         orderQueryWrapper.like(StrUtil.isNotEmpty(orderSearchDTO.getKeyword()), OrderEntity::getId, orderSearchDTO.getKeyword());
-        orderQueryWrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getMemberId()), OrderEntity::getMemberId, orderSearchDTO.getMemberId());
+        orderQueryWrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getMemberId()), OrderEntity::getMemberId, orderSearchDTO.getMemberId());
 //        orderQueryWrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getReceiverPhone()), OrderEntity::getReceiverPhone, orderSearchDTO.getReceiverPhone());
         orderQueryWrapper.orderByDesc(OrderEntity::getCreateTime);
         return page(iPage, orderQueryWrapper);

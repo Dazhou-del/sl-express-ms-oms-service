@@ -105,6 +105,11 @@
             <artifactId>sl-express-ms-mq-service</artifactId>
             <version>${sl-express-mq.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.itheima.em</groupId>
+            <artifactId>eaglemap-spring-boot-starter</artifactId>
+            <version>${eaglemap.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

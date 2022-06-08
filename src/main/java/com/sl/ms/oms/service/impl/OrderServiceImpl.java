@@ -4,6 +4,10 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.em.sdk.EagleMapTemplate;
+import com.itheima.em.sdk.enums.ProviderEnum;
+import com.itheima.em.sdk.vo.Coordinate;
+import com.itheima.em.sdk.vo.GeoResult;
 import com.sl.ms.base.api.common.AreaFeign;
 import com.sl.ms.base.domain.base.AreaDto;
 import com.sl.ms.mq.service.MQService;
@@ -15,9 +19,8 @@ import com.sl.ms.oms.enums.OrderType;
 import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderService;
-import com.sl.ms.oms.utils.EntCoordSyncJob;
-import com.sl.ms.scope.api.AgencyScopeFeign;
-import com.sl.ms.scope.dto.AgencyScopeDto;
+import com.sl.ms.scope.api.ServiceScopeFeign;
+import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDto;
 import com.sl.transport.common.util.Result;
@@ -26,10 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -59,7 +63,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     AreaFeign areaFeign;
 
     @Resource
-    AgencyScopeFeign agencyScopeFeign;
+    ServiceScopeFeign agencyScopeFeign;
+
+    @Resource
+    private EagleMapTemplate eagleMapTemplate;
 
     @Override
     public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) {
@@ -166,73 +173,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
             log.error("下单时发货地址不能为空");
             return null;
         }
-        String location = EntCoordSyncJob.getCoordinate(address);
-        log.info("订单发货地址和坐标-->" + address + "--" + location);
-        if (ObjectUtil.isEmpty(location)) {
-            log.error("下单时发货地址不能为空");
-            return null;
-        }
-        //根据坐标获取区域检查区域是否正常
-        Map map = EntCoordSyncJob.getLocationByPosition(location);
-        if (ObjectUtils.isEmpty(map)) {
-            log.error("根据地图获取区域信息为空");
-            return null;
-        }
-        String adcode = map.getOrDefault("adcode", "").toString();
-        AreaDto areaDto = areaFeign.getByCode(adcode + "000000");
-        if (ObjectUtil.isEmpty(areaDto)) {
-            log.error("区域编码:" + adcode + "区域信息未从库中获取到");
-            return null;
-        }
+        //根据详细地址查询坐标
+        GeoResult geoResult = this.eagleMapTemplate.opsForBase().geoCode(ProviderEnum.AMAP, address, null);
+        Coordinate coordinate = geoResult.getLocation();
 
-        Long areaId = areaDto.getId();
-//        if (!entity.getSenderCountyId().equals(String.valueOf(areaId))) {
-//            log.error("参数中区域id和坐标计算出真实区域id不同,数据不合法。{},{}", entity.getSenderCountyId(), areaId);
-//            return null;
-//        }
-        List<AgencyScopeDto> agencyScopes = agencyScopeFeign.findAllAgencyScope(areaId, null, null, null);
-        if (agencyScopes == null || agencyScopes.size() == 0) {
-            log.error("根据区域无法从机构范围获取网点信息列表,{}", areaId);
+        log.info("订单发货地址和坐标-->" + address + "--" + coordinate);
+        if (ObjectUtil.isEmpty(coordinate)) {
+            log.error("下单时发货地址无法定位");
             return null;
         }
-        Result res = calculateNearestAgency(location, agencyScopes);
-        if (!res.get("code").toString().equals("0")) {
+        double lng = Double.parseDouble(coordinate.getLongitude().toString()); // 经度
+        double lat = Double.parseDouble(coordinate.getLatitude().toString()); // 纬度
+        DecimalFormat df = new DecimalFormat("#.######");
+        String lngStr = df.format(lng);
+        String latStr = df.format(lat);
+        String location =  lngStr + "," + latStr;
+
+        List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
+        if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
+            log.error("下单时发货地址 不再服务范围");
             return null;
         }
         Result result = new Result();
-        result.put("code", 0);
-        result.put("agencyId", res.get("agencyId").toString());
+        Result code = result.put("code", 0);
+        result.put("agencyId", serviceScopeDTOS.get(0).getBid());
         result.put("location", location);
         return result;
-    }
-
-    /**
-     * 循环计算距离发件地址最近的网点
-     *
-     * @param location
-     * @param agencyScopes
-     * @return
-     */
-    private Result calculateNearestAgency(String location, List<AgencyScopeDto> agencyScopes) {
-        log.info("循环计算包含发件地址的网点:{}  {}", location, agencyScopes);
-        try {
-            for (AgencyScopeDto agencyScopeDto : agencyScopes) {
-                List<List<Map<String, String>>> mutiPoints = agencyScopeDto.getMultiPoints();
-                for (List<Map<String, String>> list : mutiPoints) {
-                    String[] originArray = location.split(",");
-                    boolean flag = EntCoordSyncJob.isPoint(list, Double.parseDouble(originArray[0]), Double.parseDouble(originArray[1]));
-                    if (flag) {
-                        log.info("找到包含发件地址的网点:  {}", agencyScopeDto.getAgencyId());
-                        return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
-                    }
-                    return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
-                }
-            }
-        } catch (Exception e) {
-            log.error("获取所属网点异常", e);
-            return Result.error(5000, "获取所属网点失败");
-        }
-        return Result.error(5000, "获取所属网点失败");
     }
 
     @SneakyThrows
