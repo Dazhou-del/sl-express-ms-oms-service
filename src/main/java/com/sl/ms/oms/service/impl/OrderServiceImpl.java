@@ -25,8 +25,10 @@ import com.sl.ms.user.domain.dto.AddressBookDto;
 import com.sl.transport.common.util.Result;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -291,6 +293,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         orderLocationEntity.setReceiveLocation(receiveAgentLocation);
         orderLocationEntity.setReceiveAgentId(Long.parseLong(receiveAgencyId));
         return orderLocationEntity;
+    }
+
+    /**
+     * 声明交换机，确保交换机一定存在
+     */
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(this.rabbitmqOrderStatusExchange, true, false);
     }
 
     /**
