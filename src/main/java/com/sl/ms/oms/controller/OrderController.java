@@ -199,8 +199,8 @@ public class OrderController {
         return orderLocationDto;
     }
 
-    @GetMapping("orderId")
-    public OrderLocationDto selectByOrderId(@RequestParam(name = "orderId") Long orderId) {
+    @GetMapping("location/{orderId}")
+    public OrderLocationDto findOrderLocationByOrderId(@PathVariable(name = "orderId") Long orderId) {
         OrderLocationDto result = new OrderLocationDto();
         QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
                 .eq("order_id", orderId).last(" limit 1");
