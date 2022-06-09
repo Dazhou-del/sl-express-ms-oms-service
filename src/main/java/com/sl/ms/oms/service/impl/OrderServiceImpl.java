@@ -1,8 +1,6 @@
 package com.sl.ms.oms.service.impl;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
@@ -15,6 +13,7 @@ import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
 import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
@@ -102,7 +101,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         OrderEntity entity = crudOrderService.saveOrder(order, orderCargo, orderLocation);
 
         // 生成订单mq 调度服务用来调度 之后快递员服务处理
-        noticeOrderStatusChange(order);
+        noticeOrderStatusChange(order, orderLocation);
         return entity;
     }
 
@@ -297,13 +296,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 派件
      * @param orderEntity
+     * @param orderLocation
      */
-    private void noticeOrderStatusChange(OrderEntity orderEntity) {
-        //{"order":{}, "created":123456}
-        Map<Object, Object> msg = MapUtil.builder()
-                .put("order", JSONUtil.toJsonStr(orderEntity))
-                .put("created", System.currentTimeMillis()).build();
+    private void noticeOrderStatusChange(OrderEntity orderEntity, OrderLocationEntity orderLocation) {
+        //{"order":{"orderId":123, "agencyId": 8001, "taskType":1, "mark":"带包装", "longitude":116.111, "latitude":39.00, "created":1654224658728, "estimatedStartTime": 1654224658728}, "created":123456}
+        String[] split = orderLocation.getSendLocation().split(",");
+        double lnt = Double.parseDouble(split[0]);
+        double lat = Double.parseDouble(split[1]);
+        OrderMsg build = OrderMsg.builder().created(orderEntity.getCreateTime())
+                .estimatedStartTime(orderEntity.getEstimatedStartTime())
+                .mark(orderEntity.getMark())
+                .taskType(1)
+                .latitude(lat)
+                .longitude(lnt)
+                .build();
         //发送消息
-        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, msg);
+        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, build);
     }
 }
