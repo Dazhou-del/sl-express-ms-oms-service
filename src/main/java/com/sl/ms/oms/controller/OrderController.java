@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.dto.OrderDTO;
-import com.sl.ms.oms.dto.OrderLocationDto;
+import com.sl.ms.oms.dto.OrderLocationDTO;
 import com.sl.ms.oms.dto.OrderSearchDTO;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
@@ -171,7 +171,7 @@ public class OrderController {
 
     @ResponseBody
     @PostMapping("location/saveOrUpdate")
-    public OrderLocationDto saveOrUpdateLocation(@RequestBody OrderLocationDto orderLocationDto) {
+    public OrderLocationDTO saveOrUpdateLocation(@RequestBody OrderLocationDTO orderLocationDto) {
         try {
             Long id = orderLocationDto.getId();
             Long orderId = orderLocationDto.getOrderId();
@@ -200,8 +200,8 @@ public class OrderController {
     }
 
     @GetMapping("location/{orderId}")
-    public OrderLocationDto findOrderLocationByOrderId(@PathVariable(name = "orderId") Long orderId) {
-        OrderLocationDto result = new OrderLocationDto();
+    public OrderLocationDTO findOrderLocationByOrderId(@PathVariable(name = "orderId") Long orderId) {
+        OrderLocationDTO result = new OrderLocationDTO();
         QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
                 .eq("order_id", orderId).last(" limit 1");
         OrderLocationEntity location = orderLocationService.getOne(queryWrapper);
@@ -212,7 +212,7 @@ public class OrderController {
     }
 
     @PostMapping("del")
-    public int deleteOrderLocation(@RequestBody OrderLocationDto orderLocationDto) {
+    public int deleteOrderLocation(@RequestBody OrderLocationDTO orderLocationDto) {
         Long orderId = orderLocationDto.getOrderId();
         if (ObjectUtil.isNotEmpty(orderId)) {
             UpdateWrapper<OrderLocationEntity> updateWrapper = new UpdateWrapper<OrderLocationEntity>()
