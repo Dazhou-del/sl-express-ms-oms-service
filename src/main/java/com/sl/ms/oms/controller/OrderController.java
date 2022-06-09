@@ -50,7 +50,7 @@ public class OrderController {
      * @return 订单信息
      */
     @PostMapping
-    public OrderDTO mailingSave(@RequestBody MailingSaveDTO mailingSaveDTO) {
+    public OrderDTO mailingSave(@RequestBody MailingSaveDTO mailingSaveDTO) throws Exception {
         log.info("保存订单信息:{}", JSONUtil.toJsonStr(mailingSaveDTO));
         OrderEntity order = orderService.mailingSave(mailingSaveDTO);
         return BeanUtil.toBean(order, OrderDTO.class);

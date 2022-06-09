@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
@@ -70,30 +71,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     private EagleMapTemplate eagleMapTemplate;
 
     @Override
-    public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) {
+    public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
         // 获取地址详细信息
         AddressBookDto sendAddress = addressBookFeign.detail(mailingSaveDTO.getSendAddress());
         AddressBookDto receiptAddress = addressBookFeign.detail(mailingSaveDTO.getReceiptAddress());
         log.info("sendAddress:{},{} receiptAddress:{},{}", mailingSaveDTO.getSendAddress(), sendAddress, mailingSaveDTO.getReceiptAddress(), receiptAddress);
         if (ObjectUtil.isEmpty(sendAddress) || ObjectUtil.isEmpty(receiptAddress)) {
-            log.error("获取地址详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
-            return null;
+            log.error("获取地址薄详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
+            throw new Exception("获取地址详细信息失败");
         }
         // 构建实体
         OrderEntity order = buildOrder(mailingSaveDTO, sendAddress, receiptAddress);
-
         log.info("订单信息入库:{}", order);
-        if (ObjectUtil.isEmpty(order)) {
-            return null;
-        }
 
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
-        if (ObjectUtil.isEmpty(orderLocation)) {
-            return null;
-        }
+
         // 计算运费 距离 设置当前机构ID
-        assert orderLocation != null;
         appendOtherInfo(order, orderLocation.getSendAgentId());
 
         // 货物
@@ -168,35 +162,34 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param address
      * @return
      */
-    private Result getAgencyId(String address) {
+    private Result getAgencyId(String address) throws Exception {
 
         if (ObjectUtil.isEmpty(address)) {
-            log.error("下单时发货地址不能为空");
-            return null;
+            log.error("地址不能为空");
+            throw new Exception("下单时发货地址不能为空");
         }
         //根据详细地址查询坐标
         GeoResult geoResult = this.eagleMapTemplate.opsForBase().geoCode(ProviderEnum.AMAP, address, null);
         Coordinate coordinate = geoResult.getLocation();
 
-        log.info("订单发货地址和坐标-->" + address + "--" + coordinate);
+        log.info("地址和坐标-->" + address + "--" + coordinate);
         if (ObjectUtil.isEmpty(coordinate)) {
-            log.error("下单时发货地址无法定位");
-            return null;
+            log.error("地址无法定位");
+            throw new Exception("地址无法定位");
         }
-        double lng = Double.parseDouble(coordinate.getLongitude().toString()); // 经度
-        double lat = Double.parseDouble(coordinate.getLatitude().toString()); // 纬度
+        double lng = coordinate.getLongitude(); // 经度
+        double lat = coordinate.getLatitude(); // 纬度
         DecimalFormat df = new DecimalFormat("#.######");
         String lngStr = df.format(lng);
         String latStr = df.format(lat);
-        String location =  lngStr + "," + latStr;
+        String location =  StrUtil.format("{},{}",lngStr, latStr);
 
         List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
         if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
-            log.error("下单时发货地址 不再服务范围");
-            return null;
+            log.error("地址不再服务范围");
+            throw new Exception("地址不再服务范围");
         }
         Result result = new Result();
-        Result code = result.put("code", 0);
         result.put("agencyId", serviceScopeDTOS.get(0).getBid());
         result.put("location", location);
         return result;
@@ -269,20 +262,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param order
      * @return
      */
-    private OrderLocationEntity buildOrderLocation(OrderEntity order) {
+    private OrderLocationEntity buildOrderLocation(OrderEntity order) throws Exception {
         String address = senderFullAddress(order);
         Result result = getAgencyId(address);
-        if (ObjectUtil.isEmpty(result)) {
-            return null;
-        }
         String agencyId = result.get("agencyId").toString();
         String sendLocation = result.get("location").toString();
 
         String receiverAddress = receiverFullAddress(order);
         Result resultReceive = getAgencyId(receiverAddress);
-        if (ObjectUtil.isEmpty(resultReceive)) {
-            return null;
-        }
         String receiveAgencyId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
