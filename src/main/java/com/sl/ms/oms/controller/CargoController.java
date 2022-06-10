@@ -89,9 +89,8 @@ public class CargoController {
      * @return 返回信息
      */
     @DeleteMapping("/{id}")
-    public Result del(@PathVariable(name = "id") Long id) {
-        orderCargoService.removeById(id);
-        return Result.ok();
+    public boolean del(@PathVariable(name = "id") Long id) {
+        return orderCargoService.removeById(id);
     }
 
 
