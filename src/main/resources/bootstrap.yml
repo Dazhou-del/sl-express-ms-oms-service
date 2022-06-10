@@ -2,7 +2,7 @@ spring:
   application:
     name: sl-express-ms-oms
   profiles:
-    active: local
+    active: test
   mvc:
     pathmatch:
       #解决异常：swagger Failed to start bean 'documentationPluginsBootstrapper'; nested exception is java.lang.NullPointerException
