@@ -1,9 +1,12 @@
 package com.sl.ms.oms.service.impl;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.em.sdk.EagleMapTemplate;
+import com.itheima.em.sdk.enums.ProviderEnum;
+import com.itheima.em.sdk.vo.Coordinate;
+import com.itheima.em.sdk.vo.GeoResult;
 import com.sl.ms.base.api.common.AreaFeign;
 import com.sl.ms.base.domain.base.AreaDto;
 import com.sl.ms.mq.service.MQService;
@@ -11,25 +14,28 @@ import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
 import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderService;
-import com.sl.ms.oms.utils.EntCoordSyncJob;
-import com.sl.ms.scope.api.AgencyScopeFeign;
-import com.sl.ms.scope.dto.AgencyScopeDto;
+import com.sl.ms.scope.api.ServiceScopeFeign;
+import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDto;
 import com.sl.transport.common.util.Result;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -59,33 +65,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     AreaFeign areaFeign;
 
     @Resource
-    AgencyScopeFeign agencyScopeFeign;
+    ServiceScopeFeign agencyScopeFeign;
+
+    @Resource
+    private EagleMapTemplate eagleMapTemplate;
 
     @Override
-    public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) {
+    public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
         // 获取地址详细信息
         AddressBookDto sendAddress = addressBookFeign.detail(mailingSaveDTO.getSendAddress());
         AddressBookDto receiptAddress = addressBookFeign.detail(mailingSaveDTO.getReceiptAddress());
         log.info("sendAddress:{},{} receiptAddress:{},{}", mailingSaveDTO.getSendAddress(), sendAddress, mailingSaveDTO.getReceiptAddress(), receiptAddress);
         if (ObjectUtil.isEmpty(sendAddress) || ObjectUtil.isEmpty(receiptAddress)) {
-            log.error("获取地址详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
-            return null;
+            log.error("获取地址薄详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
+            throw new Exception("获取地址详细信息失败");
         }
         // 构建实体
         OrderEntity order = buildOrder(mailingSaveDTO, sendAddress, receiptAddress);
-
         log.info("订单信息入库:{}", order);
-        if (ObjectUtil.isEmpty(order)) {
-            return null;
-        }
 
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
-        if (ObjectUtil.isEmpty(orderLocation)) {
-            return null;
-        }
+
         // 计算运费 距离 设置当前机构ID
-        assert orderLocation != null;
         appendOtherInfo(order, orderLocation.getSendAgentId());
 
         // 货物
@@ -95,7 +97,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         OrderEntity entity = crudOrderService.saveOrder(order, orderCargo, orderLocation);
 
         // 生成订单mq 调度服务用来调度 之后快递员服务处理
-        noticeOrderStatusChange(order);
+        noticeOrderStatusChange(order, orderLocation);
         return entity;
     }
 
@@ -160,79 +162,37 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param address
      * @return
      */
-    private Result getAgencyId(String address) {
+    private Result getAgencyId(String address) throws Exception {
 
         if (ObjectUtil.isEmpty(address)) {
-            log.error("下单时发货地址不能为空");
-            return null;
+            log.error("地址不能为空");
+            throw new Exception("下单时发货地址不能为空");
         }
-        String location = EntCoordSyncJob.getCoordinate(address);
-        log.info("订单发货地址和坐标-->" + address + "--" + location);
-        if (ObjectUtil.isEmpty(location)) {
-            log.error("下单时发货地址不能为空");
-            return null;
-        }
-        //根据坐标获取区域检查区域是否正常
-        Map map = EntCoordSyncJob.getLocationByPosition(location);
-        if (ObjectUtils.isEmpty(map)) {
-            log.error("根据地图获取区域信息为空");
-            return null;
-        }
-        String adcode = map.getOrDefault("adcode", "").toString();
-        AreaDto areaDto = areaFeign.getByCode(adcode + "000000");
-        if (ObjectUtil.isEmpty(areaDto)) {
-            log.error("区域编码:" + adcode + "区域信息未从库中获取到");
-            return null;
-        }
+        //根据详细地址查询坐标
+        GeoResult geoResult = this.eagleMapTemplate.opsForBase().geoCode(ProviderEnum.AMAP, address, null);
+        Coordinate coordinate = geoResult.getLocation();
 
-        Long areaId = areaDto.getId();
-//        if (!entity.getSenderCountyId().equals(String.valueOf(areaId))) {
-//            log.error("参数中区域id和坐标计算出真实区域id不同,数据不合法。{},{}", entity.getSenderCountyId(), areaId);
-//            return null;
-//        }
-        List<AgencyScopeDto> agencyScopes = agencyScopeFeign.findAllAgencyScope(areaId, null, null, null);
-        if (agencyScopes == null || agencyScopes.size() == 0) {
-            log.error("根据区域无法从机构范围获取网点信息列表,{}", areaId);
-            return null;
+        log.info("地址和坐标-->" + address + "--" + coordinate);
+        if (ObjectUtil.isEmpty(coordinate)) {
+            log.error("地址无法定位");
+            throw new Exception("地址无法定位");
         }
-        Result res = calculateNearestAgency(location, agencyScopes);
-        if (!res.get("code").toString().equals("0")) {
-            return null;
+        double lng = coordinate.getLongitude(); // 经度
+        double lat = coordinate.getLatitude(); // 纬度
+        DecimalFormat df = new DecimalFormat("#.######");
+        String lngStr = df.format(lng);
+        String latStr = df.format(lat);
+        String location =  StrUtil.format("{},{}",lngStr, latStr);
+
+        List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
+        if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
+            log.error("地址不再服务范围");
+            throw new Exception("地址不再服务范围");
         }
         Result result = new Result();
-        result.put("code", 0);
-        result.put("agencyId", res.get("agencyId").toString());
+        result.put("agencyId", serviceScopeDTOS.get(0).getBid());
         result.put("location", location);
         return result;
-    }
-
-    /**
-     * 循环计算距离发件地址最近的网点
-     *
-     * @param location
-     * @param agencyScopes
-     * @return
-     */
-    private Result calculateNearestAgency(String location, List<AgencyScopeDto> agencyScopes) {
-        log.info("循环计算包含发件地址的网点:{}  {}", location, agencyScopes);
-        try {
-            for (AgencyScopeDto agencyScopeDto : agencyScopes) {
-                List<List<Map<String, String>>> mutiPoints = agencyScopeDto.getMultiPoints();
-                for (List<Map<String, String>> list : mutiPoints) {
-                    String[] originArray = location.split(",");
-                    boolean flag = EntCoordSyncJob.isPoint(list, Double.parseDouble(originArray[0]), Double.parseDouble(originArray[1]));
-                    if (flag) {
-                        log.info("找到包含发件地址的网点:  {}", agencyScopeDto.getAgencyId());
-                        return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
-                    }
-                    return Result.ok().put("agencyId", agencyScopeDto.getAgencyId());
-                }
-            }
-        } catch (Exception e) {
-            log.error("获取所属网点异常", e);
-            return Result.error(5000, "获取所属网点失败");
-        }
-        return Result.error(5000, "获取所属网点失败");
     }
 
     @SneakyThrows
@@ -302,20 +262,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param order
      * @return
      */
-    private OrderLocationEntity buildOrderLocation(OrderEntity order) {
+    private OrderLocationEntity buildOrderLocation(OrderEntity order) throws Exception {
         String address = senderFullAddress(order);
         Result result = getAgencyId(address);
-        if (ObjectUtil.isEmpty(result)) {
-            return null;
-        }
         String agencyId = result.get("agencyId").toString();
         String sendLocation = result.get("location").toString();
 
         String receiverAddress = receiverFullAddress(order);
         Result resultReceive = getAgencyId(receiverAddress);
-        if (ObjectUtil.isEmpty(resultReceive)) {
-            return null;
-        }
         String receiveAgencyId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
@@ -329,15 +283,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     }
 
     /**
+     * 声明交换机，确保交换机一定存在
+     */
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(this.rabbitmqOrderStatusExchange, true, false);
+    }
+
+    /**
      * 派件
      * @param orderEntity
+     * @param orderLocation
      */
-    private void noticeOrderStatusChange(OrderEntity orderEntity) {
-        //{"order":{}, "created":123456}
-        Map<Object, Object> msg = MapUtil.builder()
-                .put("order", JSONUtil.toJsonStr(orderEntity))
-                .put("created", System.currentTimeMillis()).build();
+    private void noticeOrderStatusChange(OrderEntity orderEntity, OrderLocationEntity orderLocation) {
+        //{"order":{"orderId":123, "agencyId": 8001, "taskType":1, "mark":"带包装", "longitude":116.111, "latitude":39.00, "created":1654224658728, "estimatedStartTime": 1654224658728}, "created":123456}
+        String[] split = orderLocation.getSendLocation().split(",");
+        double lnt = Double.parseDouble(split[0]);
+        double lat = Double.parseDouble(split[1]);
+        OrderMsg build = OrderMsg.builder().created(orderEntity.getCreateTime())
+                .estimatedStartTime(orderEntity.getEstimatedStartTime())
+                .mark(orderEntity.getMark())
+                .taskType(1)
+                .latitude(lat)
+                .longitude(lnt)
+                .build();
         //发送消息
-        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, msg);
+        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, build);
     }
 }

@@ -9,5 +9,5 @@ import com.sl.ms.oms.entity.OrderEntity;
  */
 public interface OrderService extends IService<OrderEntity> {
 
-    OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO);
+    OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception;
 }

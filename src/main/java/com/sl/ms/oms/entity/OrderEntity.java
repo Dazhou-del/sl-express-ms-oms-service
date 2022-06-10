@@ -136,6 +136,16 @@ public class OrderEntity extends BaseEntity {
      */
     private LocalDateTime estimatedArrivalTime;
 
+    /**
+     * 备注
+     */
+    private String mark;
+
+    /**
+     * 预计取件时间
+     */
+    private LocalDateTime estimatedStartTime;
+
     public LocalDateTime getEstimatedArrivalTime() {
         if (createTime == null) {
             return null;
