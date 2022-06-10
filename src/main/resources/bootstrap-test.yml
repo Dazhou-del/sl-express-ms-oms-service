@@ -33,3 +33,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID
+eagle:
+  host: ${eagle.host} #EagleMap服务地址
+  port: ${eagle.port} #EagleMap服务端口
+  timeout: ${eagle.timeout} #http请求的超时时间
