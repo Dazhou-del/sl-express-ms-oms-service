@@ -9,7 +9,7 @@ import com.itheima.em.sdk.vo.Coordinate;
 import com.itheima.em.sdk.vo.GeoResult;
 import com.sl.ms.base.api.common.AreaFeign;
 import com.sl.ms.base.domain.base.AreaDto;
-import com.sl.ms.mq.service.MQService;
+import com.sl.mq.service.MQService;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;

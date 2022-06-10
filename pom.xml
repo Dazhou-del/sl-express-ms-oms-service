@@ -95,14 +95,9 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-        <!--AMQP依赖，包含RabbitMQ-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sl-express.ms.mq</groupId>
-            <artifactId>sl-express-ms-mq-service</artifactId>
+            <groupId>com.sl-express.mq</groupId>
+            <artifactId>sl-express-mq</artifactId>
             <version>${sl-express-mq.version}</version>
         </dependency>
         <dependency>
