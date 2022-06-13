@@ -121,7 +121,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <includeSystemScope>true</includeSystemScope>
                     <!--指定主类-->
                     <mainClass>com.sl.OmsApplication</mainClass>
                 </configuration>
