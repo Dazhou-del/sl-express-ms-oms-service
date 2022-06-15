@@ -19,7 +19,7 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param orderLocation
      * @return 订单信息
      */
-    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation);
+    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception;
 
     /**
      * 获取订单分页数据

@@ -300,12 +300,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         String[] split = orderLocation.getSendLocation().split(",");
         double lnt = Double.parseDouble(split[0]);
         double lat = Double.parseDouble(split[1]);
-        OrderMsg build = OrderMsg.builder().created(orderEntity.getCreateTime())
+        OrderMsg build = OrderMsg.builder()
+                .created(orderEntity.getCreateTime())
                 .estimatedStartTime(orderEntity.getEstimatedStartTime())
                 .mark(orderEntity.getMark())
                 .taskType(1)
                 .latitude(lat)
                 .longitude(lnt)
+                .agencyId(orderEntity.getCurrentAgencyId())
+                .orderId(orderEntity.getId())
                 .build();
         //发送消息
         this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, build);
