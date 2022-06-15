@@ -40,7 +40,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     @Transactional
     @Override
-    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) {
+    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception {
         order.setCreateTime(LocalDateTime.now());
         order.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());
         if (OrderPickupType.NO_PICKUP.getCode().equals(order.getPickupType())) {
@@ -58,7 +58,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             orderLocationService.save(orderLocation);
             return order;
         }
-        return null;
+        throw new Exception("保存订单失败");
     }
 
     @Override
