@@ -2,9 +2,10 @@ package com.sl.ms.oms.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sl.transport.common.entity.BaseEntity;
-import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,8 +15,9 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
-@ApiModel
 @TableName("sl_order")
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
