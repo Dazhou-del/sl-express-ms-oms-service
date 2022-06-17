@@ -128,17 +128,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
                 .senderName(sendAddress.getName())
                 .senderPhone(sendAddress.getPhoneNumber())
-                .senderProvinceId(sendAddress.getProvinceId().toString())
-                .senderCityId(sendAddress.getCityId().toString())
-                .senderCountyId(sendAddress.getCountyId().toString())
+                .senderProvinceId(sendAddress.getProvinceId())
+                .senderCityId(sendAddress.getCityId())
+                .senderCountyId(sendAddress.getCountyId())
                 .senderAddress(sendAddress.getAddress())
                 .senderAddressId(mailingSaveDTO.getSendAddress())
 
                 .receiverName(receiptAddress.getName())
                 .receiverPhone(receiptAddress.getPhoneNumber())
-                .receiverProvinceId(receiptAddress.getProvinceId().toString())
-                .receiverCityId(receiptAddress.getCityId().toString())
-                .receiverCountyId(receiptAddress.getCountyId().toString())
+                .receiverProvinceId(receiptAddress.getProvinceId())
+                .receiverCityId(receiptAddress.getCityId())
+                .receiverCountyId(receiptAddress.getCountyId())
                 .receiverAddress(receiptAddress.getAddress())
                 .receiverAddressId(mailingSaveDTO.getReceiptAddress())
 

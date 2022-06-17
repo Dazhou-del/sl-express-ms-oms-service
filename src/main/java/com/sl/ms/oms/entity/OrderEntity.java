@@ -41,22 +41,22 @@ public class OrderEntity extends BaseEntity {
     /**
      * 客户id
      */
-    private String memberId;
+    private Long memberId;
 
     /**
      * 收件人省份id
      */
-    private String receiverProvinceId;
+    private Long receiverProvinceId;
 
     /**
      * 收件人城市id
      */
-    private String receiverCityId;
+    private Long receiverCityId;
 
     /**
      * 收件人区县id
      */
-    private String receiverCountyId;
+    private Long receiverCountyId;
 
     /**
      * 收件人详细地址
@@ -81,17 +81,17 @@ public class OrderEntity extends BaseEntity {
     /**
      * 发件人省份id
      */
-    private String senderProvinceId;
+    private Long senderProvinceId;
 
     /**
      * 发件人城市id
      */
-    private String senderCityId;
+    private Long senderCityId;
 
     /**
      * 发件人区县id
      */
-    private String senderCountyId;
+    private Long senderCountyId;
 
     /**
      * 发件人详细地址
