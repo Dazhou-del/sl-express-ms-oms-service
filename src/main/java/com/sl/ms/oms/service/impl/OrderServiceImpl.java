@@ -2,6 +2,7 @@ package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
