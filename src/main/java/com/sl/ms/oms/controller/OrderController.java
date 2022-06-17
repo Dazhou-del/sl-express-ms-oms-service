@@ -2,6 +2,7 @@ package com.sl.ms.oms.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -209,6 +210,26 @@ public class OrderController {
             BeanUtil.copyProperties(location, result);
         }
         return result;
+    }
+
+    /**
+     * 根据orderId列表获取订单location信息
+     * @param orderIds
+     * @return
+     */
+    @GetMapping("locations")
+    public List<OrderLocationDTO> findOrderLocationByOrderIds(@RequestParam("orderIds") List<Long> orderIds) {
+        QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
+                .in("order_id", orderIds);
+        List<OrderLocationEntity> locationList = orderLocationService.list(queryWrapper);
+        if (CollectionUtil.isNotEmpty(locationList)) {
+            return locationList.stream().map(location -> {
+                OrderLocationDTO locationDTO = new OrderLocationDTO();
+                BeanUtil.copyProperties(location, locationDTO);
+                return locationDTO;
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @PostMapping("del")
