@@ -74,38 +74,38 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (order.getPaymentStatus() != null) {
             lambdaQueryWrapper.eq(OrderEntity::getPaymentStatus, order.getPaymentStatus());
         }
-//        //发件人信息
-//        if (StrUtil.isNotEmpty(order.getSenderName())) {
-//            lambdaQueryWrapper.like(OrderEntity::getSenderName, order.getSenderName());
-//        }
-//        if (StrUtil.isNotEmpty(order.getSenderPhone())) {
-//            lambdaQueryWrapper.like(OrderEntity::getSenderPhone, order.getSenderPhone());
-//        }
-//        if (StrUtil.isNotEmpty(order.getSenderProvinceId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getSenderProvinceId, order.getSenderProvinceId());
-//        }
-//        if (StrUtil.isNotEmpty(order.getSenderCityId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getSenderCityId, order.getSenderCityId());
-//        }
-//        if (StrUtil.isNotEmpty(order.getSenderCountyId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getSenderCountyId, order.getSenderCountyId());
-//        }
-//        //收件人信息
-//        if (StrUtil.isNotEmpty(order.getReceiverName())) {
-//            lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
-//        }
-//        if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
-//            lambdaQueryWrapper.like(OrderEntity::getReceiverPhone, order.getReceiverPhone());
-//        }
-//        if (StrUtil.isNotEmpty(order.getReceiverProvinceId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
-//        }
-//        if (StrUtil.isNotEmpty(order.getReceiverCityId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getReceiverCityId, order.getReceiverCityId());
-//        }
-//        if (StrUtil.isNotEmpty(order.getReceiverCountyId())) {
-//            lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
-//        }
+        //发件人信息
+        if (ObjectUtil.isNotEmpty(order.getSenderName())) {
+            lambdaQueryWrapper.like(OrderEntity::getSenderName, order.getSenderName());
+        }
+        if (StrUtil.isNotEmpty(order.getSenderPhone())) {
+            lambdaQueryWrapper.like(OrderEntity::getSenderPhone, order.getSenderPhone());
+        }
+        if (ObjectUtil.isNotEmpty(order.getSenderProvinceId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getSenderProvinceId, order.getSenderProvinceId());
+        }
+        if (ObjectUtil.isNotEmpty(order.getSenderCityId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getSenderCityId, order.getSenderCityId());
+        }
+        if (ObjectUtil.isNotEmpty(order.getSenderCountyId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getSenderCountyId, order.getSenderCountyId());
+        }
+        //收件人信息
+        if (ObjectUtil.isNotEmpty(order.getReceiverName())) {
+            lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
+        }
+        if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
+            lambdaQueryWrapper.like(OrderEntity::getReceiverPhone, order.getReceiverPhone());
+        }
+        if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
+        }
+        if (ObjectUtil.isNotEmpty(order.getReceiverCityId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getReceiverCityId, order.getReceiverCityId());
+        }
+        if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
+            lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
+        }
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
