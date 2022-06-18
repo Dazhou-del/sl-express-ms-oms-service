@@ -161,13 +161,13 @@ public class OrderController {
 
     @ResponseBody
     @PostMapping("list")
-    public List<OrderEntity> list(@RequestBody OrderSearchDTO orderSearchDTO) {
+    public List<OrderDTO> list(@RequestBody OrderSearchDTO orderSearchDTO) {
         LambdaQueryWrapper<OrderEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(orderSearchDTO.getStatus() != null, OrderEntity::getStatus, orderSearchDTO.getStatus());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getReceiverCountyIds()), OrderEntity::getReceiverCountyId, orderSearchDTO.getReceiverCountyIds());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getSenderCountyIds()), OrderEntity::getSenderCountyId, orderSearchDTO.getSenderCountyIds());
         wrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getCurrentAgencyId()), OrderEntity::getCurrentAgencyId, orderSearchDTO.getCurrentAgencyId());
-        return orderService.list(wrapper);
+        return orderService.list(wrapper).stream().map(order -> BeanUtil.toBean(order, OrderDTO.class)).collect(Collectors.toList());
     }
 
     @ResponseBody
