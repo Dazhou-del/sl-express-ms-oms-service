@@ -21,9 +21,6 @@ import java.time.LocalDateTime;
 public class OrderEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
-
-    //todo 这个不应该加后边去掉 Error attempting to get column 'id' from result set.
-    private Long id;
     /**
      * 订单类型，1为同城订单，2为城际订单
      */
