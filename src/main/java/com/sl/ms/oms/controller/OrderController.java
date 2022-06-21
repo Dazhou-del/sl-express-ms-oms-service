@@ -21,6 +21,7 @@ import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -167,6 +168,15 @@ public class OrderController {
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getReceiverCountyIds()), OrderEntity::getReceiverCountyId, orderSearchDTO.getReceiverCountyIds());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getSenderCountyIds()), OrderEntity::getSenderCountyId, orderSearchDTO.getSenderCountyIds());
         wrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getCurrentAgencyId()), OrderEntity::getCurrentAgencyId, orderSearchDTO.getCurrentAgencyId());
+
+        //快递员端进行条件查询取派件任务时，会传入关键词，作为订单id或姓名或手机号查询条件
+        if (StringUtils.isNotBlank(orderSearchDTO.getKeyword())) {
+            wrapper.like(orderSearchDTO.getOrderId() != null, OrderEntity::getId, orderSearchDTO.getKeyword())
+                    .or().like(orderSearchDTO.getSenderName() != null, OrderEntity::getSenderName, orderSearchDTO.getSenderName())
+                    .or().like(orderSearchDTO.getSenderPhone() != null, OrderEntity::getSenderPhone, orderSearchDTO.getSenderPhone())
+                    .or().like(orderSearchDTO.getReceiverName() != null, OrderEntity::getReceiverName, orderSearchDTO.getReceiverName())
+                    .or().like(orderSearchDTO.getReceiverPhone() != null, OrderEntity::getReceiverPhone, orderSearchDTO.getReceiverPhone());
+        }
         return orderService.list(wrapper).stream().map(order -> BeanUtil.toBean(order, OrderDTO.class)).collect(Collectors.toList());
     }
 
@@ -214,6 +224,7 @@ public class OrderController {
 
     /**
      * 根据orderId列表获取订单location信息
+     *
      * @param orderIds
      * @return
      */
