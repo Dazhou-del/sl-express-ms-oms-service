@@ -106,4 +106,21 @@ public class CargoController {
         return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
     }
 
+    /**
+     * 根据订单id获取货物详情
+     *
+     * @param id 订单id
+     * @return 货物详情
+     */
+    @GetMapping("/findByOrderId/{id}")
+    public OrderCargoDto findByOrderId(@PathVariable(name = "id") Long id) {
+        //构造查询条件
+        LambdaQueryWrapper<OrderCargoEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderCargoEntity::getOrderId,id);
+
+        //根据订单id查询
+        OrderCargoEntity orderCargo = orderCargoService.getOne(queryWrapper);
+        return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
+    }
+
 }
