@@ -167,7 +167,7 @@ public class OrderController {
         wrapper.eq(orderSearchDTO.getStatus() != null, OrderEntity::getStatus, orderSearchDTO.getStatus());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getReceiverCountyIds()), OrderEntity::getReceiverCountyId, orderSearchDTO.getReceiverCountyIds());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getSenderCountyIds()), OrderEntity::getSenderCountyId, orderSearchDTO.getSenderCountyIds());
-        wrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getCurrentAgencyId()), OrderEntity::getCurrentAgencyId, orderSearchDTO.getCurrentAgencyId());
+        wrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getCurrentAgencyId()), OrderEntity::getCurrentAgencyId, orderSearchDTO.getCurrentAgencyId());
 
         //快递员端进行条件查询取派件任务时，会传入关键词，作为订单id或姓名或手机号查询条件
         if (StringUtils.isNotBlank(orderSearchDTO.getKeyword())) {
