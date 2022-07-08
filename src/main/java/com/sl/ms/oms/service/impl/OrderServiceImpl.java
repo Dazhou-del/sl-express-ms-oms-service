@@ -145,7 +145,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
                 .paymentMethod(mailingSaveDTO.getPayMethod())
                 .paymentStatus(1) // 默认未付款
-
+                .estimatedStartTime(mailingSaveDTO.getPickUpTime())
                 .pickupType(mailingSaveDTO.getPickupType())
                 .build();
 
