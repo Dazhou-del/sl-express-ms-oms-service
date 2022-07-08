@@ -303,7 +303,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         double lat = Double.parseDouble(split[1]);
         OrderMsg build = OrderMsg.builder()
                 .created(orderEntity.getCreateTime())
-                .estimatedStartTime(orderEntity.getEstimatedStartTime())
+                .estimatedEndTime(orderEntity.getEstimatedStartTime())
                 .mark(orderEntity.getMark())
                 .taskType(1)
                 .latitude(lat)
