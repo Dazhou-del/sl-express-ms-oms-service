@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("cargo")
 @Slf4j
-public class CargoController {
+public class   CargoController {
 
     @Resource
     private OrderCargoService orderCargoService;
