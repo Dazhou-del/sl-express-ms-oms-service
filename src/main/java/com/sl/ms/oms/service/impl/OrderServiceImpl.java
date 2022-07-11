@@ -2,7 +2,6 @@ package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
@@ -23,7 +22,7 @@ import com.sl.ms.oms.service.OrderService;
 import com.sl.ms.scope.api.ServiceScopeFeign;
 import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.user.api.AddressBookFeign;
-import com.sl.ms.user.domain.dto.AddressBookDto;
+import com.sl.ms.user.domain.dto.AddressBookDTO;
 import com.sl.transport.common.util.Result;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -74,8 +73,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Override
     public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
         // 获取地址详细信息
-        AddressBookDto sendAddress = addressBookFeign.detail(mailingSaveDTO.getSendAddress());
-        AddressBookDto receiptAddress = addressBookFeign.detail(mailingSaveDTO.getReceiptAddress());
+        AddressBookDTO sendAddress = addressBookFeign.detail(mailingSaveDTO.getSendAddress());
+        AddressBookDTO receiptAddress = addressBookFeign.detail(mailingSaveDTO.getReceiptAddress());
         log.info("sendAddress:{},{} receiptAddress:{},{}", mailingSaveDTO.getSendAddress(), sendAddress, mailingSaveDTO.getReceiptAddress(), receiptAddress);
         if (ObjectUtil.isEmpty(sendAddress) || ObjectUtil.isEmpty(receiptAddress)) {
             log.error("获取地址薄详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
@@ -122,7 +121,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param receiptAddress
      * @return
      */
-    private OrderEntity buildOrder(MailingSaveDTO mailingSaveDTO, AddressBookDto sendAddress, AddressBookDto receiptAddress) {
+    private OrderEntity buildOrder(MailingSaveDTO mailingSaveDTO, AddressBookDTO sendAddress, AddressBookDTO receiptAddress) {
         OrderEntity entity = OrderEntity.builder()
                 // 用户ID
                 .memberId(mailingSaveDTO.getMemberId())
