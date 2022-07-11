@@ -3,10 +3,11 @@ package com.sl.ms.oms.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.sl.ms.oms.dto.OrderCargoDto;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.sl.ms.oms.dto.OrderCargoDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.service.OrderCargoService;
-import com.sl.transport.common.util.Result;
+import com.sl.transport.common.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,22 +34,36 @@ public class   CargoController {
      * @return 货物列表
      */
     @GetMapping("")
-    public List<OrderCargoDto> findAll(@RequestParam(name = "tranOrderId", required = false) Long tranOrderId,
+    public List<OrderCargoDTO> findAll(@RequestParam(name = "tranOrderId", required = false) Long tranOrderId,
                                        @RequestParam(name = "orderId", required = false) Long orderId) {
         log.info("oms --- 查询货物列表");
         return orderCargoService.findAll(tranOrderId, orderId).stream().map(orderCargo -> {
             log.info("oms ---  orderCargoService.findAll  result:{}", orderCargo);
-            return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
+            return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
         }).collect(Collectors.toList());
     }
 
     @GetMapping("/list")
-    public List<OrderCargoDto> list(@RequestParam(name = "orderIds", required = false) List<String> orderIds) {
+    public List<OrderCargoDTO> list(@RequestParam(name = "orderIds", required = false) List<String> orderIds) {
         LambdaQueryWrapper<OrderCargoEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.in(CollUtil.isNotEmpty(orderIds), OrderCargoEntity::getOrderId, orderIds);
 
         return orderCargoService.list(wrapper).stream()
-                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDto.class))
+                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 批量查询货物信息表
+     *
+     * @param name
+     * @return
+     */
+    @GetMapping("/hot")
+    List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name) {
+        return orderCargoService.list(Wrappers.<OrderCargoEntity>lambdaQuery().like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)).stream()
+                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
+                .limit(20)
                 .collect(Collectors.toList());
     }
 
@@ -59,12 +74,12 @@ public class   CargoController {
      * @return 货物信息
      */
     @PostMapping("")
-    public OrderCargoDto save(@RequestBody OrderCargoDto dto) {
+    public OrderCargoDTO save(@RequestBody OrderCargoDTO dto) {
         log.info("保存货物信息：{}", dto);
         OrderCargoEntity orderCargo = BeanUtil.toBean(dto, OrderCargoEntity.class);
         orderCargoService.saveOrUpdate(orderCargo);
         log.info("货物信息入库：{}", dto);
-        return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
+        return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
     }
 
     /**
@@ -75,7 +90,7 @@ public class   CargoController {
      * @return 货物信息
      */
     @PutMapping("/{id}")
-    public OrderCargoDto update(@PathVariable(name = "id") Long id, @RequestBody OrderCargoDto dto) {
+    public OrderCargoDTO update(@PathVariable(name = "id") Long id, @RequestBody OrderCargoDTO dto) {
         dto.setId(id);
         OrderCargoEntity orderCargo = BeanUtil.toBean(dto, OrderCargoEntity.class);
         orderCargoService.updateById(orderCargo);
@@ -101,9 +116,9 @@ public class   CargoController {
      * @return 货物详情
      */
     @GetMapping("/{id}")
-    public OrderCargoDto findById(@PathVariable(name = "id") Long id) {
+    public OrderCargoDTO findById(@PathVariable(name = "id") Long id) {
         OrderCargoEntity orderCargo = orderCargoService.getById(id);
-        return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
+        return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
     }
 
     /**
@@ -113,14 +128,14 @@ public class   CargoController {
      * @return 货物详情
      */
     @GetMapping("/findByOrderId/{id}")
-    public OrderCargoDto findByOrderId(@PathVariable(name = "id") Long id) {
+    public OrderCargoDTO findByOrderId(@PathVariable(name = "id") Long id) {
         //构造查询条件
         LambdaQueryWrapper<OrderCargoEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(OrderCargoEntity::getOrderId,id);
 
         //根据订单id查询
         OrderCargoEntity orderCargo = orderCargoService.getOne(queryWrapper);
-        return BeanUtil.toBean(orderCargo, OrderCargoDto.class);
+        return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
     }
 
 }
