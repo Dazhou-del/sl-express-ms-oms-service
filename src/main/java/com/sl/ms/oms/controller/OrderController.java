@@ -20,6 +20,9 @@ import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
  * 订单  前端控制器
  */
 @Slf4j
+@Api(tags = "订单管理")
 @RestController
 @RequestMapping("order")
 public class OrderController {
@@ -51,6 +55,7 @@ public class OrderController {
      * @param mailingSaveDTO 订单信息
      * @return 订单信息
      */
+    @ApiOperation(value = "下单")
     @PostMapping
     public OrderDTO mailingSave(@RequestBody MailingSaveDTO mailingSaveDTO) throws Exception {
         log.info("保存订单信息:{}", JSONUtil.toJsonStr(mailingSaveDTO));
