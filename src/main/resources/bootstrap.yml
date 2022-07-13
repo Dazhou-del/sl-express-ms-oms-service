@@ -1,5 +1,7 @@
 application:
   version: v1.0
+logging:
+  config: classpath:logback-spring.xml
 spring:
   application:
     name: sl-express-ms-oms

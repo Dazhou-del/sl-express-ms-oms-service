@@ -2,8 +2,9 @@ server:
   port: 18082
   tomcat:
     uri-encoding: UTF-8
-    max-threads: 1000
-    min-spare-threads: 30
+    threads:
+      max: 1000
+      min-spare: 30
 spring:
   cloud:
     nacos:
@@ -14,26 +15,31 @@ spring:
         namespace: ecae68ba-7b43-4473-a980-4ddeb6157bdc
       config:
         namespace: ecae68ba-7b43-4473-a980-4ddeb6157bdc
-  datasource: #数据库的配置
-    driver-class-name: ${jdbc.driver}
-    url: ${jdbc.url}
-    username: ${jdbc.username}
-    password: ${jdbc.password}
-  rabbitmq:
-    host: ${rabbitmq.host}
-    port: ${rabbitmq.port}
-    username: ${rabbitmq.username}
-    password: ${rabbitmq.password}
-    virtual-host: ${rabbitmq.virtual-host}
-mybatis-plus:
-  configuration:
-    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: ASSIGN_ID
-eagle:
-  host: ${eagle.host} #EagleMap服务地址
-  port: ${eagle.port} #EagleMap服务端口
-  timeout: ${eagle.timeout} #http请求的超时时间
+        shared-configs: #共享配置
+          - data-id: shared-spring-seata.yml
+            group: SHARED_GROUP
+            refresh: true
+          - data-id: shared-spring-mysql.yml
+            group: SHARED_GROUP
+            refresh: true
+          - data-id: shared-spring-mybatis-plus.yml
+            group: SHARED_GROUP
+            refresh: true
+          - data-id: shared-spring-rabbitmq.yml
+            group: SHARED_GROUP
+            refresh: true
+          - data-id: shared-spring-redis.yml
+            group: SHARED_GROUP
+            refresh: true
+          - data-id: shared-spring-eaglemap.yml
+            group: SHARED_GROUP
+            refresh: true
+sl:
+  swagger:
+    package-path: com.sl.ms.oms.controller
+    title: 神领物流 - 订单微服务接口文档
+    description: 该微服务完成订单相关业务。
+    contact-name: 传智教育·研究院
+    contact-url: http://www.itcast.cn/
+    contact-email: yjy@itcast.cn
+    version: ${application.version}
