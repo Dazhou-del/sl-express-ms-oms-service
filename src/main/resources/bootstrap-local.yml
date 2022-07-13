@@ -18,19 +18,19 @@ spring:
         shared-configs: #共享配置
           - data-id: shared-spring-seata.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
           - data-id: shared-spring-mysql.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
           - data-id: shared-spring-mybatis-plus.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
           - data-id: shared-spring-rabbitmq.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
           - data-id: shared-spring-redis.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
           - data-id: shared-spring-eaglemap.yml
             group: SHARED_GROUP
-            refresh: true
+            refresh: false
