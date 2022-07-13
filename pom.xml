@@ -105,6 +105,11 @@
             <artifactId>eaglemap-spring-boot-starter</artifactId>
             <version>${eaglemap.version}</version>
         </dependency>
+        <!--seata-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
