@@ -91,6 +91,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
+        log.info("订单位置为：{}", orderLocation);
 
         // 计算运费 距离 设置当前机构ID
         appendOtherInfo(order, orderLocation.getSendAgentId());
@@ -108,6 +109,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 补充数据
+     *
      * @param order
      * @param sendAgentId
      */
@@ -123,6 +125,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 构建订单
+     *
      * @param mailingSaveDTO
      * @param sendAddress
      * @param receiptAddress
@@ -185,7 +188,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         DecimalFormat df = new DecimalFormat("#.######");
         String lngStr = df.format(lng);
         String latStr = df.format(lat);
-        String location =  StrUtil.format("{},{}",lngStr, latStr);
+        String location = StrUtil.format("{},{}", lngStr, latStr);
 
         List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
         if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
@@ -247,6 +250,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 构建货物
+     *
      * @param entity
      * @return
      */
@@ -262,6 +266,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 根据发收件人地址获取起止机构ID 调用机构范围微服务
+     *
      * @param order
      * @return
      */
@@ -295,6 +300,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 派件
+     *
      * @param orderEntity
      * @param orderLocation
      */
