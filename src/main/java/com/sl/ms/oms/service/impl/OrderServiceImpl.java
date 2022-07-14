@@ -10,6 +10,8 @@ import com.itheima.em.sdk.vo.GeoResult;
 import com.sl.ms.base.api.common.AreaFeign;
 import com.sl.ms.base.domain.base.AreaDto;
 import com.sl.mq.service.MQService;
+import com.sl.ms.carriage.appi.CarriageFeign;
+import com.sl.ms.carriage.domain.dto.WaybillDTO;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
@@ -70,6 +72,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Resource
     private EagleMapTemplate eagleMapTemplate;
 
+    @Resource
+    private CarriageFeign carriageFeign;
+
     @Override
     public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
         // 获取地址详细信息
@@ -109,9 +114,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     private void appendOtherInfo(OrderEntity order, Long sendAgentId) {
         order.setCurrentAgencyId(sendAgentId);
         //TODO 预计到达时间
-        order.setEstimatedArrivalTime(LocalDateTime.now().plus(2, ChronoUnit.DAYS));
+        order.setEstimatedArrivalTime(LocalDateTime.now().plus(3, ChronoUnit.DAYS));
         //TODO 需要计算距离和运费
+//        carriageFeign.compute(new WaybillDTO());
         order.setAmount(BigDecimal.valueOf(20));
+//        order.setDistance();
     }
 
     /**
@@ -149,10 +156,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .build();
 
         entity.setOrderType(entity.getReceiverCityId().equals(entity.getSenderCityId()) ? OrderType.INCITY.getCode() : OrderType.OUTCITY.getCode());
-//        Map map = orderFeign.getOrderMsg(entity);
-//        .Amount(new BigDecimal(map.getOrDefault("amount", "23").toString()));
-        //费用计算在订单服务中
-//        .Amount(new BigDecimal("23"));
         return entity;
     }
 

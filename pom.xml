@@ -21,6 +21,9 @@
         <sl-express-common.version>1.0-SNAPSHOT</sl-express-common.version>
         <sl-express-mq.version>1.0-SNAPSHOT</sl-express-mq.version>
         <sl-express-ms-user-api.version>1.0-SNAPSHOT</sl-express-ms-user-api.version>
+        <sl-express-ms-carriage-api.version>1.0-SNAPSHOT</sl-express-ms-carriage-api.version>
+        <sl-express-ms-transport-info-api.version>1.0-SNAPSHOT</sl-express-ms-transport-info-api.version>
+        <sl-express-ms-trade-api.version>1.0-SNAPSHOT</sl-express-ms-trade-api.version>
     </properties>
 
     <dependencies>
@@ -59,6 +62,22 @@
             <artifactId>sl-express-ms-service-scope-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.sl-express.ms.carriage</groupId>
+            <artifactId>sl-express-ms-carriage-api</artifactId>
+            <version>${sl-express-ms-carriage-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sl.ms.transport.info</groupId>
+            <artifactId>sl-express-ms-transport-info-api</artifactId>
+            <version>${sl-express-ms-transport-info-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sl-express.ms.trade</groupId>
+            <artifactId>sl-express-ms-trade-api</artifactId>
+            <version>${sl-express-ms-trade-api.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
