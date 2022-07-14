@@ -119,7 +119,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         order.setEstimatedArrivalTime(LocalDateTime.now().plus(3, ChronoUnit.DAYS));
         //TODO 需要计算距离和运费
 //        carriageFeign.compute(new WaybillDTO());
-        order.setAmount(BigDecimal.valueOf(20));
+        order.setAmount(BigDecimal.valueOf(0.01));
 //        order.setDistance();
     }
 
