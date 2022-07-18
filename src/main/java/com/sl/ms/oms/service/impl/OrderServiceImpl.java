@@ -15,11 +15,13 @@ import com.sl.ms.base.api.common.AreaFeign;
 import com.sl.ms.base.domain.base.AreaDto;
 import com.sl.mq.service.MQService;
 import com.sl.ms.carriage.appi.CarriageFeign;
+import com.sl.ms.carriage.domain.dto.CarriageDTO;
 import com.sl.ms.carriage.domain.dto.WaybillDTO;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
 import com.sl.ms.oms.mapper.OrderMapper;
@@ -97,11 +99,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         OrderLocationEntity orderLocation = buildOrderLocation(order);
         log.info("订单位置为：{}", orderLocation);
 
-        // 计算运费 距离 设置当前机构ID
-        appendOtherInfo(order, orderLocation);
-
         // 货物
         OrderCargoEntity orderCargo = buildOrderCargo(mailingSaveDTO);
+
+        // 计算运费 距离 设置当前机构ID
+        appendOtherInfo(order, orderLocation, orderCargo);
 
         // 执行保存
         OrderEntity entity = crudOrderService.saveOrder(order, orderCargo, orderLocation);
@@ -113,15 +115,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 补充数据
-     *  @param order 订单
+     * @param order 订单
      * @param orderLocation 订单位置
+     * @param orderCargo
      */
-    private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation) {
+    private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation, OrderCargoEntity orderCargo) {
         // 当前机构
         order.setCurrentAgencyId(orderLocation.getSendAgentId());
-        //TODO 运费
-//        carriageFeign.compute(new WaybillDTO());
-        order.setAmount(BigDecimal.valueOf(0.01));
+
+        // 运费
+        WaybillDTO waybillDTO = WaybillDTO.builder()
+                .senderCityId(order.getSenderCityId())
+                .receiverCityId(order.getReceiverCityId())
+                .volume(orderCargo.getVolume().toBigInteger().intValue())
+                .weight(orderCargo.getWeight().toBigInteger().doubleValue())
+                .build();
+
+        CarriageDTO compute = carriageFeign.compute(waybillDTO);
+        if (ObjectUtil.isEmpty(compute)) {
+           throw new SLException(StrUtil.format("计算运费出错 orderCargo {}", orderCargo));
+        }
+        order.setAmount(BigDecimal.valueOf(compute.getExpense()));
 
         //查询地图服务商
         String[] sendLocation = orderLocation.getSendLocation().split(",");
@@ -278,15 +292,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 构建货物
      *
-     * @param entity
+     * @param mailingSaveDTO
      * @return
      */
-    private OrderCargoEntity buildOrderCargo(MailingSaveDTO entity) {
+    private OrderCargoEntity buildOrderCargo(MailingSaveDTO mailingSaveDTO) {
         OrderCargoEntity cargoDto = new OrderCargoEntity();
-        cargoDto.setName(entity.getGoodsName());
-        cargoDto.setGoodsTypeId(entity.getGoodsType());
-        cargoDto.setWeight(new BigDecimal(entity.getGoodsWeight()));
-        cargoDto.setQuantity(1);
+        cargoDto.setName(mailingSaveDTO.getGoodsName());
+        cargoDto.setGoodsTypeId(mailingSaveDTO.getGoodsType());
+        cargoDto.setWeight(new BigDecimal(mailingSaveDTO.getGoodsWeight()));
+        cargoDto.setQuantity(mailingSaveDTO.getGoodNum());
         cargoDto.setTotalWeight(cargoDto.getWeight().multiply(new BigDecimal(cargoDto.getQuantity())));
         return cargoDto;
     }
