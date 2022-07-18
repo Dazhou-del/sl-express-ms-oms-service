@@ -1,7 +1,11 @@
 package com.sl.ms.oms.service.impl;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
@@ -94,7 +98,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         log.info("订单位置为：{}", orderLocation);
 
         // 计算运费 距离 设置当前机构ID
-        appendOtherInfo(order, orderLocation.getSendAgentId());
+        appendOtherInfo(order, orderLocation);
 
         // 货物
         OrderCargoEntity orderCargo = buildOrderCargo(mailingSaveDTO);
@@ -109,18 +113,41 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 补充数据
-     *
-     * @param order
-     * @param sendAgentId
+     *  @param order
+     * @param orderLocation
      */
-    private void appendOtherInfo(OrderEntity order, Long sendAgentId) {
-        order.setCurrentAgencyId(sendAgentId);
-        //TODO 预计到达时间
-        order.setEstimatedArrivalTime(LocalDateTime.now().plus(3, ChronoUnit.DAYS));
-        //TODO 需要计算距离和运费
+    private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation) {
+        // 当前机构
+        order.setCurrentAgencyId(orderLocation.getSendAgentId());
+        //TODO 运费
 //        carriageFeign.compute(new WaybillDTO());
         order.setAmount(BigDecimal.valueOf(0.01));
-//        order.setDistance();
+
+        //查询地图服务商
+        String[] sendLocation = orderLocation.getSendLocation().split(",");
+        double sendLnt = Double.parseDouble(sendLocation[0]);
+        double sendLat = Double.parseDouble(sendLocation[1]);
+
+        String[] receiveLocation = orderLocation.getReceiveLocation().split(",");
+        double receiveLnt = Double.parseDouble(receiveLocation[0]);
+        double receiveLat = Double.parseDouble(receiveLocation[1]);
+        Coordinate origin = new Coordinate(sendLnt, sendLat);
+        Coordinate destination = new Coordinate(receiveLnt, receiveLat);
+        //设置高德地图参数，默认是不返回预计耗时的，需要额外设置参数
+        Map<String, Object> param = MapUtil.<String, Object>builder().put("show_fields", "cost").build();
+        String driving = this.eagleMapTemplate.opsForDirection().driving(ProviderEnum.AMAP, origin, destination, param);
+        if (StrUtil.isEmpty(driving)) {
+            return;
+        }
+        JSONObject jsonObject = JSONUtil.parseObj(driving);
+        //距离，单位：米
+        BigDecimal distance = Convert.toBigDecimal(jsonObject.getByPath("route.paths[0].distance"));
+        order.setDistance(distance);
+
+        //时间，单位：秒
+        Long duration = Convert.toLong(jsonObject.getByPath("route.paths[0].cost.duration"), -1L);
+        // 预计到达时间 这里根据地图大致估算时间 并非实际时间
+        order.setEstimatedArrivalTime(LocalDateTime.now().plus(duration, ChronoUnit.SECONDS));
     }
 
     /**
