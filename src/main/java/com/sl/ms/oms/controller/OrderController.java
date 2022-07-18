@@ -10,16 +10,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.sl.ms.oms.dto.MailingSaveDTO;
-import com.sl.ms.oms.dto.OrderDTO;
-import com.sl.ms.oms.dto.OrderLocationDTO;
-import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.dto.*;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
+import com.sl.transport.common.vo.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiOperation;
@@ -59,28 +57,20 @@ public class OrderController {
     @PostMapping
     public OrderDTO mailingSave(@RequestBody MailingSaveDTO mailingSaveDTO) throws Exception {
         log.info("保存订单信息:{}", JSONUtil.toJsonStr(mailingSaveDTO));
-        OrderEntity order = orderService.mailingSave(mailingSaveDTO);
-        return BeanUtil.toBean(order, OrderDTO.class);
+        return orderService.mailingSave(mailingSaveDTO);
     }
 
-
-    // @PostMapping("orderMsg")
-    // public Map save(@RequestBody OrderDTO orderDTO) {
-    //     Map map = Maps.newHashMap();
-    //     if (orderDTO == null) {
-    //         return map;
-    //     }
-    //     if (orderDTO.getOrderCargoDto() == null) {
-    //         return map;
-    //     }
-    //     BigDecimal bigDecimal = orderDTO.getOrderCargoDto().getTotalWeight() == null ? BigDecimal.ZERO : orderDTO.getOrderCargoDto().getTotalWeight();
-    //     if (bigDecimal.compareTo(BigDecimal.ZERO) < 1) {
-    //         return map;
-    //     }
-    //     //根据重量和距离
-    //     map = orderService.calculateAmount(orderDTO);
-    //     return map;
-    // }
+    /**
+     * 预估总价
+     *
+     * @param mailingSaveDTO 订单信息
+     * @return 预估信息
+     */
+    @ApiOperation("预估总价")
+    @PostMapping("totalPrice")
+    public OrderCarriageDTO totalPrice(@RequestBody MailingSaveDTO mailingSaveDTO) {
+        return orderService.totalPrice(mailingSaveDTO);
+    }
 
     /**
      * 修改订单信息

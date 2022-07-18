@@ -1,5 +1,6 @@
 package com.sl.ms.oms.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -18,6 +19,8 @@ import com.sl.ms.carriage.appi.CarriageFeign;
 import com.sl.ms.carriage.domain.dto.CarriageDTO;
 import com.sl.ms.carriage.domain.dto.WaybillDTO;
 import com.sl.ms.oms.dto.MailingSaveDTO;
+import com.sl.ms.oms.dto.OrderCarriageDTO;
+import com.sl.ms.oms.dto.OrderDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
@@ -81,19 +84,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Resource
     private CarriageFeign carriageFeign;
 
+    /**
+     * 下单
+     * @param mailingSaveDTO 下单信息
+     * @return 下单成功信息
+     * @throws Exception
+     */
     @Override
-    public OrderEntity mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
+    public OrderDTO mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
         // 获取地址详细信息
-        AddressBookDTO sendAddress = addressBookFeign.detail(mailingSaveDTO.getSendAddress());
-        AddressBookDTO receiptAddress = addressBookFeign.detail(mailingSaveDTO.getReceiptAddress());
-        log.info("sendAddress:{},{} receiptAddress:{},{}", mailingSaveDTO.getSendAddress(), sendAddress, mailingSaveDTO.getReceiptAddress(), receiptAddress);
-        if (ObjectUtil.isEmpty(sendAddress) || ObjectUtil.isEmpty(receiptAddress)) {
-            log.error("获取地址薄详细信息 失败 mailingSaveDTO :{}", mailingSaveDTO);
-            throw new Exception("获取地址详细信息失败");
-        }
+        HashMap<Long, AddressBookDTO> orderAddress = getOrderAddress(mailingSaveDTO.getSendAddress(), mailingSaveDTO.getReceiptAddress());
+        AddressBookDTO sendAddress = orderAddress.get(mailingSaveDTO.getSendAddress());
+        AddressBookDTO receiptAddress = orderAddress.get(mailingSaveDTO.getReceiptAddress());
         // 构建实体
         OrderEntity order = buildOrder(mailingSaveDTO, sendAddress, receiptAddress);
         log.info("订单信息入库:{}", order);
+
+        // 计算运费
+        CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
+        order.setAmount(BigDecimal.valueOf(carriageDTO.getExpense()));
 
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
@@ -102,15 +111,83 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         // 货物
         OrderCargoEntity orderCargo = buildOrderCargo(mailingSaveDTO);
 
-        // 计算运费 距离 设置当前机构ID
+        // 距离 设置当前机构ID
         appendOtherInfo(order, orderLocation, orderCargo);
 
         // 执行保存
-        OrderEntity entity = crudOrderService.saveOrder(order, orderCargo, orderLocation);
+        crudOrderService.saveOrder(order, orderCargo, orderLocation);
 
         // 生成订单mq 调度服务用来调度 之后快递员服务处理
         noticeOrderStatusChange(order, orderLocation);
-        return entity;
+
+        // 返回下单成功页
+        OrderDTO orderDTO = BeanUtil.toBean(order, OrderDTO.class);
+        // 基础运费
+        orderDTO.setFirstWeight(carriageDTO.getFirstWeight());
+        return orderDTO;
+    }
+
+    /**
+     * 获取订单地址信息
+     * @param sendAddressId 发送地址ID
+     * @param receiptAddressId 接收地址ID
+     * @return
+     */
+    private HashMap<Long, AddressBookDTO> getOrderAddress(Long sendAddressId, Long receiptAddressId) {
+        AddressBookDTO sendAddress = addressBookFeign.detail(sendAddressId);
+        AddressBookDTO receiptAddress = addressBookFeign.detail(receiptAddressId);
+        log.info("sendAddress:{},{} receiptAddress:{},{}", receiptAddressId, sendAddress, receiptAddressId, receiptAddress);
+        if (ObjectUtil.isEmpty(sendAddress) || ObjectUtil.isEmpty(receiptAddress)) {
+            log.error("获取地址薄详细信息 失败 receiptAddressId  receiptAddressId :{} {} ", sendAddressId, receiptAddressId);
+            throw new SLException("获取地址详细信息失败");
+        }
+        HashMap<Long, AddressBookDTO> map = new HashMap<>();
+        map.put(sendAddressId, sendAddress);
+        map.put(receiptAddressId, receiptAddress);
+        return map;
+    }
+
+    /**
+     * 预估总价
+     * @param mailingSaveDTO 下单信息
+     * @return 运费预估信息
+     */
+    @Override
+    public OrderCarriageDTO totalPrice(MailingSaveDTO mailingSaveDTO) {
+        // 获取地址详细信息
+        // 获取地址详细信息
+        HashMap<Long, AddressBookDTO> orderAddress = getOrderAddress(mailingSaveDTO.getSendAddress(), mailingSaveDTO.getReceiptAddress());
+        AddressBookDTO sendAddress = orderAddress.get(mailingSaveDTO.getSendAddress());
+        AddressBookDTO receiptAddress = orderAddress.get(mailingSaveDTO.getReceiptAddress());
+        // 计算运费
+        CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
+        return BeanUtil.toBean(carriageDTO, OrderCarriageDTO.class);
+    }
+
+    /**
+     * 运费计算
+     * @param mailingSaveDTO 下单信息
+     * @param senderCityId 发送城市ID
+     * @param receiverCityId 接收城市ID
+     * @return 计算结果
+     */
+    private CarriageDTO computeCarriage(MailingSaveDTO mailingSaveDTO, Long senderCityId, Long receiverCityId) {
+        // 运费
+        WaybillDTO waybillDTO = WaybillDTO.builder()
+                .senderCityId(senderCityId)
+                .receiverCityId(receiverCityId)
+                .measureHigh(mailingSaveDTO.getMeasureHigh())
+                .measureLong(mailingSaveDTO.getMeasureLong())
+                .measureWidth(mailingSaveDTO.getMeasureWidth())
+                .volume(mailingSaveDTO.getTotalVolume().toBigInteger().intValue())
+                .weight(mailingSaveDTO.getTotalWeight().toBigInteger().doubleValue())
+                .build();
+
+        CarriageDTO compute = carriageFeign.compute(waybillDTO);
+        if (ObjectUtil.isEmpty(compute)) {
+            throw new SLException(StrUtil.format("计算运费出错 mailingSaveDTO {}", mailingSaveDTO));
+        }
+        return compute;
     }
 
     /**
@@ -122,20 +199,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation, OrderCargoEntity orderCargo) {
         // 当前机构
         order.setCurrentAgencyId(orderLocation.getSendAgentId());
-
-        // 运费
-        WaybillDTO waybillDTO = WaybillDTO.builder()
-                .senderCityId(order.getSenderCityId())
-                .receiverCityId(order.getReceiverCityId())
-                .volume(orderCargo.getVolume().toBigInteger().intValue())
-                .weight(orderCargo.getWeight().toBigInteger().doubleValue())
-                .build();
-
-        CarriageDTO compute = carriageFeign.compute(waybillDTO);
-        if (ObjectUtil.isEmpty(compute)) {
-           throw new SLException(StrUtil.format("计算运费出错 orderCargo {}", orderCargo));
-        }
-        order.setAmount(BigDecimal.valueOf(compute.getExpense()));
 
         //查询地图服务商
         String[] sendLocation = orderLocation.getSendLocation().split(",");
@@ -167,9 +230,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 构建订单
      *
-     * @param mailingSaveDTO
-     * @param sendAddress
-     * @param receiptAddress
+     * @param mailingSaveDTO 下单信息
+     * @param sendAddress 发送地址
+     * @param receiptAddress 接收地址
      * @return
      */
     private OrderEntity buildOrder(MailingSaveDTO mailingSaveDTO, AddressBookDTO sendAddress, AddressBookDTO receiptAddress) {
@@ -206,7 +269,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 根据地址计算网点
      *
-     * @param address
+     * @param address 地址
      * @return
      */
     private Result getAgencyId(String address) throws Exception {
@@ -292,24 +355,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 构建货物
      *
-     * @param mailingSaveDTO
+     * @param mailingSaveDTO 下单信息
      * @return
      */
     private OrderCargoEntity buildOrderCargo(MailingSaveDTO mailingSaveDTO) {
-        OrderCargoEntity cargoDto = new OrderCargoEntity();
-        cargoDto.setName(mailingSaveDTO.getGoodsName());
-        cargoDto.setGoodsTypeId(mailingSaveDTO.getGoodsType());
-        cargoDto.setWeight(new BigDecimal(mailingSaveDTO.getGoodsWeight()));
-        cargoDto.setQuantity(mailingSaveDTO.getGoodNum());
-        cargoDto.setTotalWeight(cargoDto.getWeight().multiply(new BigDecimal(cargoDto.getQuantity())));
-        return cargoDto;
+        OrderCargoEntity cargoEntity = new OrderCargoEntity();
+        cargoEntity.setName(mailingSaveDTO.getGoodsName());
+        cargoEntity.setGoodsTypeId(mailingSaveDTO.getGoodsType());
+
+        // 数量
+        cargoEntity.setQuantity(mailingSaveDTO.getGoodNum());
+
+        // 重量
+        cargoEntity.setTotalWeight(mailingSaveDTO.getTotalWeight());
+        cargoEntity.setWeight(mailingSaveDTO.getTotalWeight());
+
+        // 体积
+        cargoEntity.setTotalVolume(mailingSaveDTO.getTotalVolume());
+        cargoEntity.setVolume(mailingSaveDTO.getTotalVolume());
+        return cargoEntity;
     }
 
     /**
      * 根据发收件人地址获取起止机构ID 调用机构范围微服务
      *
-     * @param order
-     * @return
+     * @param order 订单
+     * @return 位置信息
      */
     private OrderLocationEntity buildOrderLocation(OrderEntity order) throws Exception {
         String address = senderFullAddress(order);
@@ -342,8 +413,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     /**
      * 派件
      *
-     * @param orderEntity
-     * @param orderLocation
+     * @param orderEntity 订单
+     * @param orderLocation 位置
      */
     private void noticeOrderStatusChange(OrderEntity orderEntity, OrderLocationEntity orderLocation) {
         //{"order":{"orderId":123, "agencyId": 8001, "taskType":1, "mark":"带包装", "longitude":116.111, "latitude":39.00, "created":1654224658728, "estimatedStartTime": 1654224658728}, "created":123456}

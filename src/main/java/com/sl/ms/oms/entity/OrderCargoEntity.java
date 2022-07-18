@@ -2,6 +2,7 @@ package com.sl.ms.oms.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sl.transport.common.entity.BaseEntity;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -66,12 +67,12 @@ public class OrderCargoEntity extends BaseEntity {
     private String remark;
 
     /**
-     * 货品总体积
+     * 货品总体积 m^3
      */
     private BigDecimal totalVolume;
 
     /**
-     * 货品总重量
+     * 货品总重量 kg
      */
     private BigDecimal totalWeight;
 }
