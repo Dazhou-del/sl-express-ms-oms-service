@@ -113,8 +113,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 补充数据
-     *  @param order
-     * @param orderLocation
+     *  @param order 订单
+     * @param orderLocation 订单位置
      */
     private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation) {
         // 当前机构
