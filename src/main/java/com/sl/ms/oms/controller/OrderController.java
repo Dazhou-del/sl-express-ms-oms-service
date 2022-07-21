@@ -74,7 +74,7 @@ public class OrderController {
 
     @GetMapping("count")
     @ApiOperation(value = "统计", notes = "统计各个状态的数量")
-    public List<OrderStatusCountDTO> count(Long memberId) {
+    public List<OrderStatusCountDTO> count(@RequestParam("memberId") Long memberId) {
         return crudOrderService.groupByStatus(memberId);
     }
 
