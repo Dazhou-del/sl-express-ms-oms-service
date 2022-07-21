@@ -305,37 +305,47 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         return result;
     }
 
+    /**
+     * 合并地址
+     * @param entity 订单
+     * @return 地址
+     */
     @SneakyThrows
     private String senderFullAddress(OrderEntity entity) {
-        StringBuilder stringBuffer = new StringBuilder();
-        Long province = Long.valueOf(entity.getSenderProvinceId());
-        Long city = Long.valueOf(entity.getSenderCityId());
-        Long county = Long.valueOf(entity.getSenderCountyId());
+        Long province = entity.getSenderProvinceId();
+        Long city = entity.getSenderCityId();
+        Long county = entity.getSenderCountyId();
 
-        Set<Long> areaIdSet = new HashSet<Long>();
-        areaIdSet.add(province);
-        areaIdSet.add(city);
-        areaIdSet.add(county);
+        StringBuilder stringBuilder = areaAddress(province, city, county);
+        stringBuilder.append(entity.getSenderAddress());
 
-        List<AreaDto> result = areaFeign.findAll(null, new ArrayList<>(areaIdSet));
-        Map<Long, AreaDto> areaMap = result.stream().collect(Collectors.toMap(AreaDto::getId, vo -> vo));
-
-        stringBuffer.append(areaMap.get(province).getName());
-        stringBuffer.append(areaMap.get(city).getName());
-        stringBuffer.append(areaMap.get(county).getName());
-        stringBuffer.append(entity.getSenderAddress());
-
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
 
+    /**
+     * 合并地址
+     * @param entity 订单
+     * @return 地址
+     */
     @SneakyThrows
     private String receiverFullAddress(OrderEntity orderDTO) {
+
+
+        Long province = orderDTO.getReceiverProvinceId();
+        Long city = orderDTO.getReceiverCityId();
+        Long county = orderDTO.getReceiverCountyId();
+
+        StringBuilder stringBuilder = areaAddress(province, city, county);
+        stringBuilder.append(orderDTO.getReceiverAddress());
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 合并地址
+     * @return 地址
+     */
+    private StringBuilder areaAddress(Long province, Long city, Long county) {
         StringBuilder stringBuffer = new StringBuilder();
-
-        Long province = Long.valueOf(orderDTO.getReceiverProvinceId());
-        Long city = Long.valueOf(orderDTO.getReceiverCityId());
-        Long county = Long.valueOf(orderDTO.getReceiverCountyId());
-
         Set<Long> areaIdSet = new HashSet<Long>();
         areaIdSet.add(province);
         areaIdSet.add(city);
@@ -347,9 +357,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         stringBuffer.append(areaMap.get(province).getName());
         stringBuffer.append(areaMap.get(city).getName());
         stringBuffer.append(areaMap.get(county).getName());
-        stringBuffer.append(orderDTO.getReceiverAddress());
-
-        return stringBuffer.toString();
+        return stringBuffer;
     }
 
     /**
