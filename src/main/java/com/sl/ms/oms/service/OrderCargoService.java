@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sl.ms.oms.dto.OrderCargoDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 
 import java.util.List;
@@ -27,4 +28,6 @@ public interface OrderCargoService extends IService<OrderCargoEntity> {
      * @return 货物列表
      */
     List<OrderCargoEntity> findAll(Long tranOrderId, Long orderId);
+
+    OrderCargoDTO findByOrderId(Long id);
 }

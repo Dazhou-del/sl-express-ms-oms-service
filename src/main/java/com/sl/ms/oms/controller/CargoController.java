@@ -132,13 +132,7 @@ public class   CargoController {
      */
     @GetMapping("/findByOrderId/{id}")
     public OrderCargoDTO findByOrderId(@PathVariable(name = "id") Long id) {
-        //构造查询条件
-        LambdaQueryWrapper<OrderCargoEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(OrderCargoEntity::getOrderId,id);
-
-        //根据订单id查询
-        OrderCargoEntity orderCargo = orderCargoService.getOne(queryWrapper);
-        return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
+        return orderCargoService.findByOrderId(id);
     }
 
 }

@@ -2,6 +2,7 @@ package com.sl.ms.oms.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
@@ -46,4 +47,10 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param memberId 用户ID
      */
     List<OrderStatusCountDTO> groupByStatus(Long memberId);
+
+    /**
+     * 快递员取件更新订单和货物信息
+     * @param orderPickupDTO 订单和货物信息
+     */
+    void orderPickup(OrderPickupDTO orderPickupDTO);
 }

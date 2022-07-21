@@ -237,4 +237,9 @@ public class OrderController {
         }
         return 0;
     }
+
+    @PutMapping("orderPickup")
+    void orderPickup(OrderPickupDTO orderPickupDTO) {
+        crudOrderService.orderPickup(orderPickupDTO);
+    }
 }

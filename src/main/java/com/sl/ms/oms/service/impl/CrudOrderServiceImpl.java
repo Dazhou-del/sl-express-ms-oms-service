@@ -1,11 +1,14 @@
 package com.sl.ms.oms.service.impl;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sl.ms.oms.dto.OrderCargoDTO;
+import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,6 +163,37 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         send.setCount(sendCount);
         list.add(send);
         return list;
+    }
+
+    /**
+     * 快递员取件更新订单和货物信息
+     * @param orderPickupDTO 订单和货物信息
+     */
+    @Transactional
+    @Override
+    public void orderPickup(OrderPickupDTO orderPickupDTO) {
+        //5.更新订单
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setPaymentMethod(orderPickupDTO.getPayMethod());//付款方式,1.预结2到付
+        orderEntity.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());//付款状态,1.未付2已付
+        orderEntity.setAmount(orderPickupDTO.getAmount());//金额
+        orderEntity.setStatus(OrderStatus.PICKED_UP.getCode());//订单状态
+        orderEntity.setMark(orderPickupDTO.getRemark());//备注
+        orderEntity.setId(orderPickupDTO.getId());
+        updateById(orderEntity);
+
+        //6.更新订单货品
+        BigDecimal volume = NumberUtil.round(orderPickupDTO.getVolume(), 4);
+        BigDecimal weight = NumberUtil.round(orderPickupDTO.getWeight(), 2);
+        OrderCargoDTO cargoDTO = orderCargoService.findByOrderId(orderPickupDTO.getId());
+        OrderCargoEntity orderCargoEntity = new OrderCargoEntity();
+        orderCargoEntity.setName(orderPickupDTO.getGoodName());//货物名称
+        orderCargoEntity.setVolume(volume);//货品体积，单位m^3
+        orderCargoEntity.setWeight(weight);//货品重量，单位kg
+        orderCargoEntity.setTotalVolume(volume);//货品总体积，单位m^3
+        orderCargoEntity.setTotalWeight(weight);//货品总重量，单位kg
+        orderCargoEntity.setId(cargoDTO.getId());
+        orderCargoService.saveOrUpdate(orderCargoEntity);
     }
 
 }
