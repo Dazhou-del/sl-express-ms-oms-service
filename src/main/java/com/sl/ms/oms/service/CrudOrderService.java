@@ -2,7 +2,7 @@ package com.sl.ms.oms.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
@@ -40,9 +40,10 @@ public interface CrudOrderService extends IService<OrderEntity> {
     List<OrderEntity> findAll(List<Long> ids);
 
     /**
-     * 获取订单分页数据 客户端使用
+     * 统计各个状态的数量
      *
-     * @return 订单分页数据
+     * @return 状态数量数据
+     * @param memberId 用户ID
      */
-    IPage<OrderEntity> pageLikeForCustomer(OrderSearchDTO orderSearchDTO);
+    List<OrderStatusCountDTO> groupByStatus(Long memberId);
 }

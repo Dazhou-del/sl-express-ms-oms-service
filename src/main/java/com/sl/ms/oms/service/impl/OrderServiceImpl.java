@@ -7,6 +7,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
@@ -21,6 +22,7 @@ import com.sl.ms.carriage.domain.dto.WaybillDTO;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.dto.OrderCarriageDTO;
 import com.sl.ms.oms.dto.OrderDTO;
+import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
@@ -324,7 +326,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
     /**
      * 合并地址
-     * @param entity 订单
+     * @param orderDTO 订单
      * @return 地址
      */
     @SneakyThrows

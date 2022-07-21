@@ -3,13 +3,14 @@ package com.sl.ms.oms.service.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sl.ms.oms.dto.OrderSearchDTO;
+import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.ms.oms.enums.MailType;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.ms.oms.enums.OrderPickupType;
 import com.sl.ms.oms.enums.OrderStatus;
@@ -17,12 +18,16 @@ import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderCargoService;
 import com.sl.ms.oms.service.OrderLocationService;
+import com.sl.ms.user.api.MemberFeign;
+import com.sl.ms.user.domain.dto.MemberDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,11 +37,14 @@ import java.util.List;
 @Slf4j
 public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements CrudOrderService {
 
-    @Autowired
+    @Resource
     private OrderCargoService orderCargoService;
 
-    @Autowired
+    @Resource
     private OrderLocationService orderLocationService;
+
+    @Resource
+    private MemberFeign memberFeign;
 
     @Transactional
     @Override
@@ -106,6 +114,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
         }
+        lambdaQueryWrapper.eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
@@ -120,20 +129,36 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         return list(lambdaQueryWrapper);
     }
 
+    /**
+     * 统计各个状态的数量
+     *
+     * @return 状态数量数据
+     * @param memberId 用户ID
+     */
     @Override
-    public IPage<OrderEntity> pageLikeForCustomer(OrderSearchDTO orderSearchDTO) {
+    public List<OrderStatusCountDTO> groupByStatus(Long memberId) {
+        List<OrderStatusCountDTO> list = new ArrayList<>();
+        MemberDTO detail = memberFeign.detail(memberId);
+        // 收件数量
+        long count = count(Wrappers.<OrderEntity>lambdaQuery()
+                .eq(OrderEntity::getReceiverPhone, detail.getPhone())
+        );
+        OrderStatusCountDTO orderStatusCountDTO = new OrderStatusCountDTO();
+        orderStatusCountDTO.setStatus(MailType.RECEIVE);
+        orderStatusCountDTO.setStatusCode(MailType.RECEIVE.getCode());
+        orderStatusCountDTO.setCount(count);
+        list.add(orderStatusCountDTO);
 
-        Integer page = orderSearchDTO.getPage();
-        Integer pageSize = orderSearchDTO.getPageSize();
-
-        IPage<OrderEntity> iPage = new Page<>(page, pageSize);
-
-        LambdaQueryWrapper<OrderEntity> orderQueryWrapper = new LambdaQueryWrapper<>();
-        orderQueryWrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getId()), OrderEntity::getId, orderSearchDTO.getId());
-        orderQueryWrapper.like(StrUtil.isNotEmpty(orderSearchDTO.getKeyword()), OrderEntity::getId, orderSearchDTO.getKeyword());
-        orderQueryWrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getMemberId()), OrderEntity::getMemberId, orderSearchDTO.getMemberId());
-//        orderQueryWrapper.eq(StrUtil.isNotEmpty(orderSearchDTO.getReceiverPhone()), OrderEntity::getReceiverPhone, orderSearchDTO.getReceiverPhone());
-        orderQueryWrapper.orderByDesc(OrderEntity::getCreateTime);
-        return page(iPage, orderQueryWrapper);
+        // 寄件数量
+        long sendCount = count(Wrappers.<OrderEntity>lambdaQuery()
+                .eq(OrderEntity::getMemberId, memberId)
+        );
+        OrderStatusCountDTO send = new OrderStatusCountDTO();
+        send.setStatus(MailType.SEND);
+        send.setStatusCode(MailType.SEND.getCode());
+        send.setCount(sendCount);
+        list.add(orderStatusCountDTO);
+        return list;
     }
+
 }

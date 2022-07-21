@@ -72,6 +72,12 @@ public class OrderController {
         return orderService.totalPrice(mailingSaveDTO);
     }
 
+    @GetMapping("count")
+    @ApiOperation(value = "统计", notes = "统计各个状态的数量")
+    public List<OrderStatusCountDTO> count(Long memberId) {
+        return crudOrderService.groupByStatus(memberId);
+    }
+
     /**
      * 修改订单信息
      *
@@ -136,23 +142,6 @@ public class OrderController {
         List<OrderEntity> orders = orderService.listByIds(ids);
         return orders.stream().map(item -> BeanUtil.toBean(item, OrderDTO.class))
                 .collect(Collectors.toList());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "pageLikeForCustomer", method = RequestMethod.POST)
-    public PageResponse<OrderDTO> pageLikeForCustomer(@RequestBody OrderSearchDTO orderSearchDTO) {
-        //查询结果
-        IPage<OrderEntity> orderIPage = crudOrderService.pageLikeForCustomer(orderSearchDTO);
-        List<OrderDTO> dtoList = new ArrayList<>();
-        orderIPage.getRecords().forEach(order -> {
-            dtoList.add(BeanUtil.toBean(order, OrderDTO.class));
-        });
-
-        return PageResponse.<OrderDTO>builder()
-                .items(dtoList)
-                .pageSize(orderSearchDTO.getPageSize())
-                .page(orderSearchDTO.getPage()).counts(orderIPage.getTotal())
-                .pages(orderIPage.getPages()).build();
     }
 
     @ResponseBody
