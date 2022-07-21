@@ -2,6 +2,7 @@ package com.sl.ms.oms.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sl.transport.common.entity.BaseEntity;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -166,6 +167,19 @@ public class OrderEntity extends BaseEntity {
      * 23009为已签收，23010为拒收，230011为已取消
      */
     private Integer status;
+
+    @ApiModelProperty(value = "交易系统订单号【对于三方来说：商户订单】")
+    private Long tradingOrderNo;
+
+    @ApiModelProperty(value = "支付渠道【支付宝、微信、现金、免单挂账】")
+    private String tradingChannel;
+
+    @ApiModelProperty(value = "退款金额【付款后】")
+    private BigDecimal refund;
+
+    @ApiModelProperty(value = "是否有退款：YES，NO")
+    private String isRefund;
+
 
 
 }

@@ -157,7 +157,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         send.setStatus(MailType.SEND);
         send.setStatusCode(MailType.SEND.getCode());
         send.setCount(sendCount);
-        list.add(orderStatusCountDTO);
+        list.add(send);
         return list;
     }
 
