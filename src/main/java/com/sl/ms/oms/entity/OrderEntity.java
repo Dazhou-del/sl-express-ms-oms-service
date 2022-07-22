@@ -159,7 +159,8 @@ public class OrderEntity extends BaseEntity {
     /**
      * 距离
      */
-    private BigDecimal distance;
+    @ApiModelProperty(value = "距离，单位：米")
+    private Double distance;
 
     /**
      * 订单状态: 22000已关闭, 23000为待取件,23001为已取件，23002为网点自寄，23003为网点入库，

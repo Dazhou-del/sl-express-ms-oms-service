@@ -220,7 +220,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         }
         JSONObject jsonObject = JSONUtil.parseObj(driving);
         //距离，单位：米
-        BigDecimal distance = Convert.toBigDecimal(jsonObject.getByPath("route.paths[0].distance"));
+        Double distance = Convert.toDouble(jsonObject.getByPath("route.paths[0].distance"));
         order.setDistance(distance);
 
         //时间，单位：秒
