@@ -24,7 +24,6 @@ import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.user.api.MemberFeign;
 import com.sl.ms.user.domain.dto.MemberDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,7 +51,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     @Transactional
     @Override
-    public OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception {
+    public void saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception {
         order.setCreateTime(LocalDateTime.now());
         order.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());
         if (OrderPickupType.NO_PICKUP.getCode().equals(order.getPickupType())) {
@@ -68,14 +67,14 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             // 保存位置
             orderLocation.setOrderId(order.getId());
             orderLocationService.save(orderLocation);
-            return order;
+            return;
         }
         throw new Exception("保存订单失败");
     }
 
     @Override
-    public Page findByPage(Integer page, Integer pageSize, OrderEntity order) {
-        Page iPage = new Page(page, pageSize);
+    public Page<OrderEntity> findByPage(Integer page, Integer pageSize, OrderEntity order) {
+        Page<OrderEntity> iPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<OrderEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         if (ObjectUtil.isNotEmpty(order.getId())) {
             lambdaQueryWrapper.like(OrderEntity::getId, order.getId());

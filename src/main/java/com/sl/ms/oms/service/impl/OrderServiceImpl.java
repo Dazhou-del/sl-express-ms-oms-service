@@ -26,6 +26,7 @@ import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
@@ -259,7 +260,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .receiverAddressId(mailingSaveDTO.getReceiptAddress())
 
                 .paymentMethod(mailingSaveDTO.getPayMethod())
-                .paymentStatus(1) // 默认未付款
+                .paymentStatus(OrderPaymentStatus.UNPAID.getStatus()) // 默认未付款
                 .estimatedStartTime(mailingSaveDTO.getPickUpTime())
                 .pickupType(mailingSaveDTO.getPickupType())
                 .build();

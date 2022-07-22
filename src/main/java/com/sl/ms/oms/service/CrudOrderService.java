@@ -16,11 +16,10 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * 新增订单
      *
      * @param order 订单信息
-     * @param orderCargo
-     * @param orderLocation
-     * @return 订单信息
+     * @param orderCargo 订单
+     * @param orderLocation 位置
      */
-    OrderEntity saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception;
+    void saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception;
 
     /**
      * 获取订单分页数据
