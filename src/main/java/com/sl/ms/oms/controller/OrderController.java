@@ -144,6 +144,11 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 列表查询
+     * @param orderSearchDTO 条件
+     * @return 订单列表
+     */
     @ResponseBody
     @PostMapping("list")
     public List<OrderDTO> list(@RequestBody OrderSearchDTO orderSearchDTO) {
@@ -164,36 +169,12 @@ public class OrderController {
         return orderService.list(wrapper).stream().map(order -> BeanUtil.toBean(order, OrderDTO.class)).collect(Collectors.toList());
     }
 
-    @ResponseBody
-    @PostMapping("location/saveOrUpdate")
-    public OrderLocationDTO saveOrUpdateLocation(@RequestBody OrderLocationDTO orderLocationDto) {
-        try {
-            Long id = orderLocationDto.getId();
-            Long orderId = orderLocationDto.getOrderId();
-            if (ObjectUtil.isNotEmpty(id)) {
-                QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
-                        .eq("order_id", orderId).last(" limit 1");
-                OrderLocationEntity location = orderLocationService.getBaseMapper()
-                        .selectOne(queryWrapper);
-                if (location != null) {
-                    OrderLocationEntity orderLocationUpdate = new OrderLocationEntity();
-                    BeanUtil.copyProperties(orderLocationDto, orderLocationUpdate);
-                    orderLocationUpdate.setId(location.getId());
-                    orderLocationService.getBaseMapper().updateById(orderLocationUpdate);
-                    BeanUtil.copyProperties(orderLocationUpdate, orderLocationDto);
-                }
-            } else {
-                OrderLocationEntity orderLocation = new OrderLocationEntity();
-                BeanUtil.copyProperties(orderLocationDto, orderLocation);
-                orderLocationService.save(orderLocation);
-                BeanUtil.copyProperties(orderLocation, orderLocationDto);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return orderLocationDto;
-    }
 
+    /**
+     * 查询订单位置
+     * @param orderId 订单ID
+     * @return 位置
+     */
     @GetMapping("location/{orderId}")
     public OrderLocationDTO findOrderLocationByOrderId(@PathVariable(name = "orderId") Long orderId) {
         OrderLocationDTO result = new OrderLocationDTO();
@@ -207,10 +188,10 @@ public class OrderController {
     }
 
     /**
-     * 根据orderId列表获取订单location信息
+     * 根据orderId列表查询订单的location信息
      *
-     * @param orderIds
-     * @return
+     * @param orderIds 订单id列表
+     * @return 位置
      */
     @GetMapping("locations")
     public List<OrderLocationDTO> findOrderLocationByOrderIds(@RequestParam("orderIds") List<Long> orderIds) {
@@ -225,17 +206,6 @@ public class OrderController {
             }).collect(Collectors.toList());
         }
         return new ArrayList<>();
-    }
-
-    @PostMapping("del")
-    public int deleteOrderLocation(@RequestBody OrderLocationDTO orderLocationDto) {
-        Long orderId = orderLocationDto.getOrderId();
-        if (ObjectUtil.isNotEmpty(orderId)) {
-            UpdateWrapper<OrderLocationEntity> updateWrapper = new UpdateWrapper<OrderLocationEntity>()
-                    .eq("order_id", orderLocationDto);
-            return orderLocationService.getBaseMapper().delete(updateWrapper);
-        }
-        return 0;
     }
 
     /**
