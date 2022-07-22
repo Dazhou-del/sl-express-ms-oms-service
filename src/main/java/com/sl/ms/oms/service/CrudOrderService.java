@@ -58,5 +58,5 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param orderId 订单ID
      * @param code 状态码
      */
-    void updateStatus(Long orderId, Integer code);
+    void updateStatus(List<Long> orderId, Integer code);
 }

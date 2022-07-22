@@ -170,9 +170,9 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
      * @param code 状态码
      */
     @Override
-    public void updateStatus(Long orderId, Integer code) {
+    public void updateStatus(List<Long> orderId, Integer code) {
         update(Wrappers.<OrderEntity>lambdaUpdate()
-                .eq(OrderEntity::getId, orderId)
+                .in(OrderEntity::getId, orderId)
         .set(OrderEntity::getStatus, code));
     }
 

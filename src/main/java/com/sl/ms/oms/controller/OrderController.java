@@ -223,7 +223,7 @@ public class OrderController {
      * @param code 状态码
      */
     @PutMapping("updateStatus")
-    void updateStatus(@RequestParam("orderId") Long orderId, @RequestParam("code") Integer code) {
+    void updateStatus(@RequestParam("orderId") List<Long> orderId, @RequestParam("code") Integer code) {
         crudOrderService.updateStatus(orderId, code);
     }
 }
