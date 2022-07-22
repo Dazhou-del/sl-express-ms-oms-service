@@ -238,8 +238,22 @@ public class OrderController {
         return 0;
     }
 
+    /**
+     * 取件更新
+     * @param orderPickupDTO 取件更新信息
+     */
     @PutMapping("orderPickup")
-    void orderPickup(OrderPickupDTO orderPickupDTO) {
+    void orderPickup(@RequestBody OrderPickupDTO orderPickupDTO) {
         crudOrderService.orderPickup(orderPickupDTO);
+    }
+
+    /**
+     * 状态更新
+     * @param orderId 订单ID
+     * @param code 状态码
+     */
+    @PutMapping("updateStatus")
+    void updateStatus(@RequestParam("orderId") Long orderId, @RequestParam("code") Integer code) {
+        crudOrderService.updateStatus(orderId, code);
     }
 }

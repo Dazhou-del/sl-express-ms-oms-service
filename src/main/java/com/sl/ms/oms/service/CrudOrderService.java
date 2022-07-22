@@ -53,4 +53,11 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param orderPickupDTO 订单和货物信息
      */
     void orderPickup(OrderPickupDTO orderPickupDTO);
+
+    /**
+     * 状态更新
+     * @param orderId 订单ID
+     * @param code 状态码
+     */
+    void updateStatus(Long orderId, Integer code);
 }

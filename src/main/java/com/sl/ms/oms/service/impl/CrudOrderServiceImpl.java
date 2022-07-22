@@ -166,6 +166,18 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     }
 
     /**
+     * 状态更新
+     * @param orderId 订单ID
+     * @param code 状态码
+     */
+    @Override
+    public void updateStatus(Long orderId, Integer code) {
+        update(Wrappers.<OrderEntity>lambdaUpdate()
+                .eq(OrderEntity::getId, orderId)
+        .set(OrderEntity::getStatus, code));
+    }
+
+    /**
      * 快递员取件更新订单和货物信息
      * @param orderPickupDTO 订单和货物信息
      */
