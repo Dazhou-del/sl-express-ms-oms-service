@@ -2,6 +2,8 @@ package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -27,6 +29,7 @@ import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
+import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
@@ -61,10 +64,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
-
-
-    @Value("${rabbitmq.OrderStatus.exchange}")
-    private String rabbitmqOrderStatusExchange;
 
     @Autowired
     private MQService mqService;
@@ -414,14 +413,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     }
 
     /**
-     * 声明交换机，确保交换机一定存在
-     */
-    @Bean
-    public TopicExchange topicExchange() {
-        return new TopicExchange(this.rabbitmqOrderStatusExchange, true, false);
-    }
-
-    /**
      * 派件
      *
      * @param orderEntity 订单
@@ -432,8 +423,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         String[] split = orderLocation.getSendLocation().split(",");
         double lnt = Double.parseDouble(split[0]);
         double lat = Double.parseDouble(split[1]);
-        OrderMsg build = OrderMsg.builder()
-                .created(orderEntity.getCreateTime())
+        OrderMsg orderMsg = OrderMsg.builder()
+                .created(LocalDateTimeUtil.toEpochMilli(orderEntity.getCreateTime()))
                 .estimatedEndTime(orderEntity.getEstimatedStartTime())
                 .mark(orderEntity.getMark())
                 .taskType(1)
@@ -443,6 +434,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .orderId(orderEntity.getId())
                 .build();
         //发送消息
-        this.mqService.sendMsg(rabbitmqOrderStatusExchange, null, build);
+        this.mqService.sendMsg(Constants.MQ.Exchanges.ORDER, Constants.MQ.RoutingKeys.ORDER_CREATE, orderMsg);
     }
 }
