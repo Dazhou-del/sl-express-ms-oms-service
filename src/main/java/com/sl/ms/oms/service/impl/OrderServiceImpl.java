@@ -2,36 +2,30 @@ package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.em.sdk.EagleMapTemplate;
 import com.itheima.em.sdk.enums.ProviderEnum;
 import com.itheima.em.sdk.vo.Coordinate;
 import com.itheima.em.sdk.vo.GeoResult;
 import com.sl.ms.base.api.common.AreaFeign;
+import com.sl.ms.base.api.common.MQFeign;
 import com.sl.ms.base.domain.base.AreaDto;
-import com.sl.mq.service.MQService;
 import com.sl.ms.carriage.appi.CarriageFeign;
 import com.sl.ms.carriage.domain.dto.CarriageDTO;
 import com.sl.ms.carriage.domain.dto.WaybillDTO;
 import com.sl.ms.oms.dto.MailingSaveDTO;
 import com.sl.ms.oms.dto.OrderCarriageDTO;
 import com.sl.ms.oms.dto.OrderDTO;
-import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
-import com.sl.transport.common.constant.Constants;
-import com.sl.transport.common.exception.SLException;
-import com.sl.transport.common.vo.OrderMsg;
 import com.sl.ms.oms.enums.OrderType;
 import com.sl.ms.oms.mapper.OrderMapper;
 import com.sl.ms.oms.service.CrudOrderService;
@@ -40,13 +34,13 @@ import com.sl.ms.scope.api.ServiceScopeFeign;
 import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDTO;
+import com.sl.transport.common.constant.Constants;
+import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
+import com.sl.transport.common.vo.OrderMsg;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -65,8 +59,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> implements OrderService {
 
-    @Autowired
-    private MQService mqService;
+    @Resource
+    private MQFeign mqFeign;
 
     @Autowired
     private AddressBookFeign addressBookFeign;
@@ -434,6 +428,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .orderId(orderEntity.getId())
                 .build();
         //发送消息
-        this.mqService.sendMsg(Constants.MQ.Exchanges.ORDER, Constants.MQ.RoutingKeys.ORDER_CREATE, orderMsg);
+        this.mqFeign.sendMsg(Constants.MQ.Exchanges.ORDER, Constants.MQ.RoutingKeys.ORDER_CREATE, orderMsg.toJson());
     }
 }
