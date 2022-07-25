@@ -60,7 +60,7 @@ public class MQListener {
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = Constants.MQ.Queues.OMS_TRANSPORT_ORDER_UPDATE_STATUS),
-            exchange = @Exchange(name = Constants.MQ.Exchanges.TRANSPORT_ORDER, type = ExchangeTypes.TOPIC),
+            exchange = @Exchange(name = Constants.MQ.Exchanges.TRANSPORT_ORDER_DELAYED, type = ExchangeTypes.TOPIC, delayed = Constants.MQ.DELAYED),
             key = Constants.MQ.RoutingKeys.TRANSPORT_ORDER_UPDATE_STATUS_PREFIX + "#"
     ))
     public void listenTransportOrderUpdateStatusMsg(String msg) {
