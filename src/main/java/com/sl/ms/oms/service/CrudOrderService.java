@@ -7,6 +7,7 @@ import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
+import com.sl.transport.common.vo.TradeStatusMsg;
 
 import java.util.List;
 
@@ -59,4 +60,17 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param code 状态码
      */
     void updateStatus(List<Long> orderId, Integer code);
+
+    /**
+     * 更新支付状态
+     * @param ids 订单ID
+     * @param status 状态
+     */
+    void updatePayStatus(List<Long> ids, Integer status);
+
+    /**
+     * 退款成功
+     * @param msgList 退款消息
+     */
+    void updateRefundInfo(List<TradeStatusMsg> msgList);
 }

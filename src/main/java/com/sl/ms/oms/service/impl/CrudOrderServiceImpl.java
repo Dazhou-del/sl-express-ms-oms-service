@@ -4,6 +4,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -23,6 +24,7 @@ import com.sl.ms.oms.service.OrderCargoService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.user.api.MemberFeign;
 import com.sl.ms.user.domain.dto.MemberDTO;
+import com.sl.transport.common.vo.TradeStatusMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 订单  服务实现类
@@ -207,4 +210,29 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         orderCargoService.saveOrUpdate(orderCargoEntity);
     }
 
+    /**
+     * 更新支付状态
+     * @param ids 订单ID
+     * @param status 状态
+     */
+    @Override
+    public void updatePayStatus(List<Long> ids, Integer status) {
+        LambdaUpdateWrapper<OrderEntity> updateWrapper = Wrappers.<OrderEntity>lambdaUpdate()
+                .set(OrderEntity::getPaymentStatus, status)
+                .in(OrderEntity::getId, ids);
+        update(updateWrapper);
+    }
+
+    /**
+     * 退款成功
+     * @param msgList 退款消息
+     */
+    @Override
+    public void updateRefundInfo(List<TradeStatusMsg> msgList) {
+
+//        LambdaUpdateWrapper<OrderEntity> updateWrapper = Wrappers.<OrderEntity>lambdaUpdate()
+//                .set(OrderEntity::getRefund, )
+//                .in(OrderEntity::getId, msgList.stream().map(TradeStatusMsg::getProductOrderNo).collect(Collectors.toList()));
+//        update(updateWrapper);
+    }
 }
