@@ -108,7 +108,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         OrderCargoEntity orderCargo = buildOrderCargo(mailingSaveDTO);
 
         // 距离 设置当前机构ID
-        appendOtherInfo(order, orderLocation, orderCargo);
+        appendOtherInfo(order, orderLocation);
 
         // 执行保存
         crudOrderService.saveOrder(order, orderCargo, orderLocation);
@@ -190,9 +190,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * 补充数据
      * @param order 订单
      * @param orderLocation 订单位置
-     * @param orderCargo
      */
-    private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation, OrderCargoEntity orderCargo) {
+    private void appendOtherInfo(OrderEntity order, OrderLocationEntity orderLocation) {
         // 当前机构
         order.setCurrentAgencyId(orderLocation.getSendAgentId());
 
@@ -325,8 +324,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      */
     @SneakyThrows
     private String receiverFullAddress(OrderEntity orderDTO) {
-
-
         Long province = orderDTO.getReceiverProvinceId();
         Long city = orderDTO.getReceiverCityId();
         Long county = orderDTO.getReceiverCountyId();
