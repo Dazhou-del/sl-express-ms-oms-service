@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 货品总重量  前端控制器
+ * 货品
  */
 @RestController
 @RequestMapping("cargo")
@@ -51,23 +51,6 @@ public class   CargoController {
         return orderCargoService.list(wrapper).stream()
                 .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 批量查询货物信息表
-     *
-     * @param name 热门货品名称
-     * @return
-     */
-    @GetMapping("/hot")
-    List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name) {
-        return orderCargoService.list(Wrappers.<OrderCargoEntity>lambdaQuery()
-                .like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
-                .last("limit 20")
-        )
-        .stream()
-        .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
-        .collect(Collectors.toList());
     }
 
     /**
