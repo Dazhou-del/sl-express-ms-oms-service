@@ -175,7 +175,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .measureHigh(mailingSaveDTO.getMeasureHigh())
                 .measureLong(mailingSaveDTO.getMeasureLong())
                 .measureWidth(mailingSaveDTO.getMeasureWidth())
-                .volume(mailingSaveDTO.getTotalVolume().toBigInteger().intValue())
+                .volume(ObjectUtil.isEmpty(mailingSaveDTO.getTotalVolume()) ? null : mailingSaveDTO.getTotalVolume().toBigInteger().intValue())
                 .weight(mailingSaveDTO.getTotalWeight().toBigInteger().doubleValue())
                 .build();
 
