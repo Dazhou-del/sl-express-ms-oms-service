@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.sl-express</groupId>
         <artifactId>sl-express-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
 
     <groupId>com.sl-express.ms.oms</groupId>
@@ -18,7 +18,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <sl-express-common.version>1.0-SNAPSHOT</sl-express-common.version>
+        <sl-express-common.version>1.0</sl-express-common.version>
         <sl-express-mq.version>1.0-SNAPSHOT</sl-express-mq.version>
         <sl-express-ms-user-api.version>1.0-SNAPSHOT</sl-express-ms-user-api.version>
         <sl-express-ms-carriage-api.version>1.0-SNAPSHOT</sl-express-ms-carriage-api.version>
