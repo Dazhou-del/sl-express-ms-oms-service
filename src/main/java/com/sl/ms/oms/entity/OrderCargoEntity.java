@@ -2,7 +2,6 @@ package com.sl.ms.oms.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sl.transport.common.entity.BaseEntity;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
