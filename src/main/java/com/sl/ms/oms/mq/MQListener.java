@@ -54,7 +54,7 @@ public class MQListener {
     public void listenCourierPickupUpdateOrderMsg(String msg) {
         log.info("接收到快递员取件成功的消息 ({})-> {}", Constants.MQ.Queues.OMS_COURIER_PICKUP_UPDATE_ORDER, msg);
         CourierMsg courierMsg = JSONUtil.toBean(msg, CourierMsg.class);
-        OrderPickupDTO orderPickupDTO = BeanUtil.toBean(courierMsg.getInfo(), OrderPickupDTO.class);
+        OrderPickupDTO orderPickupDTO = JSONUtil.toBean(courierMsg.getInfo(), OrderPickupDTO.class);
         this.crudOrderService.orderPickup(orderPickupDTO);
     }
 
