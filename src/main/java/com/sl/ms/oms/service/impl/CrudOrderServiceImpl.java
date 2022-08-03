@@ -108,7 +108,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
         }
         if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
-            lambdaQueryWrapper.eq(OrderEntity::getReceiverPhone, order.getReceiverPhone());
+            lambdaQueryWrapper.or().eq(OrderEntity::getReceiverPhone, order.getReceiverPhone());
         }
         if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
@@ -119,7 +119,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
         }
-        lambdaQueryWrapper.eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
+        lambdaQueryWrapper.or().eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
