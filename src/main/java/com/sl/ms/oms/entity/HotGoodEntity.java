@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * 货品总重量
  */
 @Data
-@TableName("sl_order_cargo")
+@TableName("sl_hot_good")
 public class HotGoodEntity extends BaseEntity {
 
     /**
