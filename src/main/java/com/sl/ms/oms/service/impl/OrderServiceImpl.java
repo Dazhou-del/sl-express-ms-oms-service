@@ -372,8 +372,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         cargoEntity.setWeight(mailingSaveDTO.getTotalWeight());
 
         // 体积
-        cargoEntity.setTotalVolume(mailingSaveDTO.getTotalVolume());
-        cargoEntity.setVolume(mailingSaveDTO.getTotalVolume());
+        BigDecimal volume = ObjectUtil.isEmpty(mailingSaveDTO.getTotalVolume())  ? new BigDecimal(1) : mailingSaveDTO.getTotalVolume();
+        volume = ObjectUtil.equal(volume, new BigDecimal(1)) ? volume : volume.divide(new BigDecimal("1000000.00"));
+        cargoEntity.setTotalVolume(volume);
+        cargoEntity.setVolume(volume);
         return cargoEntity;
     }
 
@@ -404,7 +406,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     }
 
     /**
-     * 派件
+     * 取件
      *
      * @param orderEntity 订单
      * @param orderLocation 位置
