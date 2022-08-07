@@ -5,11 +5,13 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.json.JSONUtil;
 import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
+import com.sl.ms.oms.enums.OrderStatus;
 import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.trade.enums.RefundStatusEnum;
 import com.sl.ms.trade.enums.TradingStateEnum;
 import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
+import com.sl.ms.work.domain.enums.transportorder.TransportOrderStatus;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.vo.CourierMsg;
 import com.sl.transport.common.vo.TradeStatusMsg;
@@ -72,8 +74,30 @@ public class MQListener {
         log.info("接收到更新运单状态的消息 ({})-> {}", Constants.MQ.Queues.OMS_TRANSPORT_ORDER_UPDATE_STATUS, msg);
         TransportOrderStatusMsg transportOrderStatusMsg = JSONUtil.toBean(msg, TransportOrderStatusMsg.class);
         // 具体业务逻辑的处理
+        Integer status = getOrderStatusByTransportOrderStatus(transportOrderStatusMsg.getStatusCode());
         List<TransportOrderDTO> list = transportOrderFeign.findByIds(transportOrderStatusMsg.getIdList().toArray(String[]::new));
-        this.crudOrderService.updateStatus(list.stream().map(TransportOrderDTO::getOrderId).collect(Collectors.toList()), transportOrderStatusMsg.getStatusCode());
+        this.crudOrderService.updateStatus(list.stream().map(TransportOrderDTO::getOrderId).collect(Collectors.toList()), status);
+    }
+
+    private Integer getOrderStatusByTransportOrderStatus(Integer statusCode) {
+        // 运输中
+        if (TransportOrderStatus.PROCESSING.getCode().equals(statusCode)) {
+           return OrderStatus.IN_TRANSIT.getCode();
+        }
+        // 派送中
+        if (TransportOrderStatus.ARRIVED_END.getCode().equals(statusCode)) {
+            return OrderStatus.DISPATCHING.getCode();
+        }
+        // 已签收
+        if (TransportOrderStatus.RECEIVED.getCode().equals(statusCode)) {
+            return OrderStatus.RECEIVED.getCode();
+        }
+        // 已拒收
+        if (TransportOrderStatus.REJECTED.getCode().equals(statusCode)) {
+            return OrderStatus.REJECTION.getCode();
+        }
+        // 默认已关闭
+        return OrderStatus.CLOSE.getCode();
     }
 
     /**
