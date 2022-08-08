@@ -111,7 +111,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
             lambdaQueryWrapper.or()
                     .eq(OrderEntity::getReceiverPhone, order.getReceiverPhone())
-                    .notIn(OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
+                    .notIn(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
         }
         if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
