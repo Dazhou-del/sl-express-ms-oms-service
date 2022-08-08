@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -108,7 +109,9 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
         }
         if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
-            lambdaQueryWrapper.or().eq(OrderEntity::getReceiverPhone, order.getReceiverPhone());
+            lambdaQueryWrapper.or()
+                    .eq(OrderEntity::getReceiverPhone, order.getReceiverPhone())
+                    .notIn(OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
         }
         if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
