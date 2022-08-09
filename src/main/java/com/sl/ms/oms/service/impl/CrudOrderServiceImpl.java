@@ -82,7 +82,6 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getId())) {
             lambdaQueryWrapper.like(OrderEntity::getId, order.getId());
         }
-        lambdaQueryWrapper.ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
         if (order.getStatus() != null) {
             lambdaQueryWrapper.eq(OrderEntity::getStatus, order.getStatus());
         }
@@ -109,12 +108,6 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverName())) {
             lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
         }
-        // 客户端根据收件人查询
-        if (StrUtil.isNotEmpty(order.getReceiverPhone()) && ObjectUtil.isNotEmpty(order.getMemberId())) {
-            lambdaQueryWrapper
-                    .eq(OrderEntity::getReceiverPhone, order.getReceiverPhone())
-                    .notIn(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
-        }
         if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
         }
@@ -124,9 +117,18 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
         }
+
+        lambdaQueryWrapper
+                .eq(StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
+                // 客户端根据收件人查询 不展示这些状态
+                .notIn(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
+
+        // 客户端不展示删除状态
+        lambdaQueryWrapper.ne(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, OrderStatus.DEL.getCode());
+
+        // 客户端根据用户ID查询
         lambdaQueryWrapper.or()
-                .eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId())
-                .ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
+                .eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
