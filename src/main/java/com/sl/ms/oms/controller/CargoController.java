@@ -3,9 +3,11 @@ package com.sl.ms.oms.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.sl.ms.oms.dto.OrderCargoDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
 import com.sl.ms.oms.service.OrderCargoService;
+import com.sl.transport.common.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,6 +116,23 @@ public class CargoController {
     @GetMapping("/findByOrderId/{id}")
     public OrderCargoDTO findByOrderId(@PathVariable(name = "id") Long id) {
         return orderCargoService.findByOrderId(id);
+    }
+
+    /**
+     * 批量查询货物信息表
+     *
+     * @param name 热门货品名称
+     * @return
+     */
+    @GetMapping("/hot")
+    List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name) {
+        return orderCargoService.list(Wrappers.<OrderCargoEntity>lambdaQuery()
+                .like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
+                .last("limit 20")
+        )
+                .stream()
+                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
+                .collect(Collectors.toList());
     }
 
 }
