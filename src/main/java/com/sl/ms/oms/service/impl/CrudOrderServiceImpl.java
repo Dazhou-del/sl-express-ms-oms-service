@@ -109,8 +109,9 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverName())) {
             lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
         }
-        if (StrUtil.isNotEmpty(order.getReceiverPhone())) {
-            lambdaQueryWrapper.or()
+        // 客户端根据收件人查询
+        if (StrUtil.isNotEmpty(order.getReceiverPhone()) && ObjectUtil.isNotEmpty(order.getMemberId())) {
+            lambdaQueryWrapper
                     .eq(OrderEntity::getReceiverPhone, order.getReceiverPhone())
                     .notIn(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
         }
@@ -123,7 +124,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
         }
-        lambdaQueryWrapper.eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
+        lambdaQueryWrapper.or().eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
