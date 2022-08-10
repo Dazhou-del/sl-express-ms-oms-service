@@ -63,9 +63,11 @@ public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCa
         orderEntity.setMemberId(memberId);
         List<Long> orderIds = crudOrderService.findByPage(1, 30, orderEntity).getRecords().parallelStream().map(OrderEntity::getId).collect(Collectors.toList());
         return list(Wrappers.<OrderCargoEntity>lambdaQuery()
-                .like(com.sl.transport.common.util.ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
+                .like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
                 .in(OrderCargoEntity::getOrderId, orderIds)
-                .last("limit 5")
+                .groupBy(ObjectUtil.isEmpty(name), OrderCargoEntity::getName)
+                .last("limit 20")
+                .orderByDesc(OrderCargoEntity::getCreated)
         )
                 .stream()
                 .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
