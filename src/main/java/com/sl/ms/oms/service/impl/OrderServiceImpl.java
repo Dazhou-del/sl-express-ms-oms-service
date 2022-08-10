@@ -427,6 +427,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .orderId(orderEntity.getId())
                 .build();
         //发送消息
-        this.mqFeign.sendMsg(Constants.MQ.Exchanges.ORDER, Constants.MQ.RoutingKeys.ORDER_CREATE, orderMsg.toJson());
+        this.mqFeign.sendMsg(Constants.MQ.Exchanges.ORDER_DELAYED, Constants.MQ.RoutingKeys.ORDER_CREATE, orderMsg.toJson(), Constants.MQ.LOW_DELAY);
     }
 }
