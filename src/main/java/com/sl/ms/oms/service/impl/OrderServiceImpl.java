@@ -271,7 +271,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         if (ObjectUtil.isEmpty(address)) {
             log.error("地址不能为空");
-            throw new Exception("下单时发货地址不能为空");
+            throw new SLException("下单时发货地址不能为空");
         }
         //根据详细地址查询坐标
         GeoResult geoResult = this.eagleMapTemplate.opsForBase().geoCode(ProviderEnum.AMAP, address, null);
@@ -280,7 +280,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         log.info("地址和坐标-->" + address + "--" + coordinate);
         if (ObjectUtil.isEmpty(coordinate)) {
             log.error("地址无法定位");
-            throw new Exception("地址无法定位");
+            throw new SLException("地址无法定位");
         }
         double lng = coordinate.getLongitude(); // 经度
         double lat = coordinate.getLatitude(); // 纬度
@@ -292,7 +292,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
         if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
             log.error("地址不再服务范围");
-            throw new Exception("地址不再服务范围");
+            throw new SLException("地址不再服务范围");
         }
         Result result = new Result();
         result.put("agencyId", serviceScopeDTOS.get(0).getBid());
