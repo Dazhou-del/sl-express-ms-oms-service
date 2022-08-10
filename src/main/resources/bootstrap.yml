@@ -5,6 +5,8 @@ logging:
 spring:
   application:
     name: sl-express-ms-oms
+  main:
+    allow-circular-references: true #允许bean循环依赖
   profiles:
     active: test
   mvc:
