@@ -125,14 +125,8 @@ public class CargoController {
      * @return
      */
     @GetMapping("/hot")
-    List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name) {
-        return orderCargoService.list(Wrappers.<OrderCargoEntity>lambdaQuery()
-                .like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
-                .last("limit 20")
-        )
-                .stream()
-                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
-                .collect(Collectors.toList());
+    List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name, Long memberId) {
+        return orderCargoService.listRecent(name, memberId);
     }
 
 }

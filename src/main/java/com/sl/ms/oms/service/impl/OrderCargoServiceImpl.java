@@ -3,14 +3,19 @@ package com.sl.ms.oms.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sl.ms.oms.dto.OrderCargoDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
+import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.mapper.OrderCargoMapper;
+import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderCargoService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 货品总重量  服务实现类
@@ -18,6 +23,9 @@ import java.util.List;
 @Service
 public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCargoEntity>
         implements OrderCargoService {
+
+    @Resource
+    private CrudOrderService crudOrderService;
 
     @Override
     public OrderCargoEntity saveSelective(OrderCargoEntity record) {
@@ -47,5 +55,20 @@ public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCa
         //根据订单id查询
         OrderCargoEntity orderCargo = getOne(queryWrapper);
         return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
+    }
+
+    @Override
+    public List<OrderCargoDTO> listRecent(String name, Long memberId) {
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setMemberId(memberId);
+        List<Long> orderIds = crudOrderService.findByPage(1, 40, orderEntity).getRecords().parallelStream().map(OrderEntity::getId).collect(Collectors.toList());
+        return list(Wrappers.<OrderCargoEntity>lambdaQuery()
+                .like(com.sl.transport.common.util.ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
+                .in(OrderCargoEntity::getOrderId, orderIds)
+                .last("limit 20")
+        )
+                .stream()
+                .map(orderCargo -> BeanUtil.toBean(orderCargo, OrderCargoDTO.class))
+                .collect(Collectors.toList());
     }
 }
