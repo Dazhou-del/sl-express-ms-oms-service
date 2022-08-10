@@ -291,8 +291,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         List<ServiceScopeDTO> serviceScopeDTOS = agencyScopeFeign.queryListByLocation(1, coordinate.getLongitude(), coordinate.getLatitude());
         if (CollectionUtils.isEmpty(serviceScopeDTOS)) {
-            log.error("地址不再服务范围");
-            throw new SLException("地址不再服务范围");
+            log.error("地址不在服务范围");
+            throw new SLException("地址不在服务范围");
         }
         Result result = new Result();
         result.put("agencyId", serviceScopeDTOS.get(0).getBid());
