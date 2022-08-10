@@ -38,6 +38,8 @@ public class HotGoodController {
     List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name) {
         return hotGoodService.list(Wrappers.<HotGoodEntity>lambdaQuery()
                 .like(ObjectUtil.isNotEmpty(name), HotGoodEntity::getName, name)
+                // 没有名称查询条件 则按照类型分组返回
+                .groupBy(ObjectUtil.isEmpty(name),HotGoodEntity::getGoodsTypeId)
                 .last("limit 20")
         )
         .stream()
