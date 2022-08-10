@@ -84,7 +84,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * 下单
      * @param mailingSaveDTO 下单信息
      * @return 下单成功信息
-     * @throws Exception
+     * @throws SLException
      */
     @Override
     public OrderDTO mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception {
@@ -267,7 +267,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param address 地址
      * @return
      */
-    private Result getAgencyId(String address) throws Exception {
+    private Result getAgencyId(String address) throws SLException {
 
         if (ObjectUtil.isEmpty(address)) {
             log.error("地址不能为空");
@@ -385,7 +385,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param order 订单
      * @return 位置信息
      */
-    private OrderLocationEntity buildOrderLocation(OrderEntity order) throws Exception {
+    private OrderLocationEntity buildOrderLocation(OrderEntity order) {
         String address = senderFullAddress(order);
         Result result = getAgencyId(address);
         String agencyId = result.get("agencyId").toString();
