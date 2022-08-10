@@ -129,7 +129,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         // 客户端根据用户ID查询 或者用收件人手机号查询都可以
         lambdaQueryWrapper.or()
                 .eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId())
-                .ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
+                .ne(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, OrderStatus.DEL.getCode());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
