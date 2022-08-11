@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -14,6 +15,7 @@ import com.sl.ms.oms.service.OrderCargoService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,9 @@ public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCa
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setMemberId(memberId);
         List<Long> orderIds = crudOrderService.findByPage(1, 30, orderEntity).getRecords().parallelStream().map(OrderEntity::getId).collect(Collectors.toList());
+        if (CollUtil.isEmpty(orderIds)) {
+            return new ArrayList<>();
+        }
         return list(Wrappers.<OrderCargoEntity>lambdaQuery()
                 .like(ObjectUtil.isNotEmpty(name), OrderCargoEntity::getName, name)
                 .in(OrderCargoEntity::getOrderId, orderIds)
