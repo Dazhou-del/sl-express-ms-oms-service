@@ -118,8 +118,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         // 返回下单成功页
         OrderDTO orderDTO = BeanUtil.toBean(order, OrderDTO.class);
-        // 基础运费
+
+        // 首重价格
         orderDTO.setFirstWeight(carriageDTO.getFirstWeight());
+        // 续重价格
+        orderDTO.setContinuousWeight(carriageDTO.getContinuousWeight());
+        // 基础运费
+        orderDTO.setBaseFreight(carriageDTO.getFirstWeight() + carriageDTO.getContinuousWeight());
         return orderDTO;
     }
 
