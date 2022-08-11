@@ -43,22 +43,23 @@ public class MQListener {
 
     @Resource
     private TransportOrderFeign transportOrderFeign;
-    /**
-     * 快递员取件后更新订单
-     *Constants.MQ.Exchanges.COURIER, Constants.MQ.RoutingKeys.COURIER_PICKUP
-     * @param msg 消息
-     */
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = Constants.MQ.Queues.OMS_COURIER_PICKUP_UPDATE_ORDER),
-            exchange = @Exchange(name = Constants.MQ.Exchanges.COURIER, type = ExchangeTypes.TOPIC),
-            key = Constants.MQ.RoutingKeys.COURIER_PICKUP
-    ))
-    public void listenCourierPickupUpdateOrderMsg(String msg) {
-        log.info("接收到快递员取件成功的消息 ({})-> {}", Constants.MQ.Queues.OMS_COURIER_PICKUP_UPDATE_ORDER, msg);
-        CourierMsg courierMsg = JSONUtil.toBean(msg, CourierMsg.class);
-        OrderPickupDTO orderPickupDTO = JSONUtil.toBean(courierMsg.getInfo(), OrderPickupDTO.class);
-        this.crudOrderService.orderPickup(orderPickupDTO);
-    }
+
+//    /**
+//     * 快递员取件后更新订单
+//     *Constants.MQ.Exchanges.COURIER, Constants.MQ.RoutingKeys.COURIER_PICKUP
+//     * @param msg 消息
+//     */
+//    @RabbitListener(bindings = @QueueBinding(
+//            value = @Queue(name = Constants.MQ.Queues.OMS_COURIER_PICKUP_UPDATE_ORDER),
+//            exchange = @Exchange(name = Constants.MQ.Exchanges.COURIER, type = ExchangeTypes.TOPIC),
+//            key = Constants.MQ.RoutingKeys.COURIER_PICKUP
+//    ))
+//    public void listenCourierPickupUpdateOrderMsg(String msg) {
+//        log.info("接收到快递员取件成功的消息 ({})-> {}", Constants.MQ.Queues.OMS_COURIER_PICKUP_UPDATE_ORDER, msg);
+//        CourierMsg courierMsg = JSONUtil.toBean(msg, CourierMsg.class);
+//        OrderPickupDTO orderPickupDTO = JSONUtil.toBean(courierMsg.getInfo(), OrderPickupDTO.class);
+//        this.crudOrderService.orderPickup(orderPickupDTO);
+//    }
 
     /**
      * 更新运单状态
