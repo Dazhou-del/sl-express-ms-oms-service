@@ -123,8 +123,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         orderDTO.setFirstWeight(carriageDTO.getFirstWeight());
         // 续重价格
         orderDTO.setContinuousWeight(carriageDTO.getContinuousWeight());
-        // 基础运费
-        orderDTO.setBaseFreight(carriageDTO.getFirstWeight() + carriageDTO.getContinuousWeight());
+        // 基础运费 todo 二期 目前只基础运费就是总价
         return orderDTO;
     }
 
@@ -163,10 +162,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         // 计算运费
         CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
 
-        OrderCarriageDTO orderCarriageDTO = BeanUtil.toBean(carriageDTO, OrderCarriageDTO.class);
-        // 基础运费
-        orderCarriageDTO.setBaseFreight(carriageDTO.getFirstWeight() + carriageDTO.getContinuousWeight());
-        return orderCarriageDTO;
+        return BeanUtil.toBean(carriageDTO, OrderCarriageDTO.class);
     }
 
     /**
