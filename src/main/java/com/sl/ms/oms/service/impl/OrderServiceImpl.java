@@ -162,7 +162,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         AddressBookDTO receiptAddress = orderAddress.get(mailingSaveDTO.getReceiptAddress());
         // 计算运费
         CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
-        return BeanUtil.toBean(carriageDTO, OrderCarriageDTO.class);
+
+        OrderCarriageDTO orderCarriageDTO = BeanUtil.toBean(carriageDTO, OrderCarriageDTO.class);
+        // 基础运费
+        orderCarriageDTO.setBaseFreight(carriageDTO.getFirstWeight() + carriageDTO.getContinuousWeight());
+        return orderCarriageDTO;
     }
 
     /**
