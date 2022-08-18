@@ -244,4 +244,9 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 //                .in(OrderEntity::getId, msgList.stream().map(TradeStatusMsg::getProductOrderNo).collect(Collectors.toList()));
 //        update(updateWrapper);
     }
+
+    @Override
+    public List<OrderEntity> findByMemberId(Long memberId) {
+        return list(Wrappers.<OrderEntity>lambdaQuery().eq(OrderEntity::getMemberId, memberId));
+    }
 }

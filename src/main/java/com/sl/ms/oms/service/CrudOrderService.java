@@ -9,6 +9,7 @@ import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.transport.common.vo.TradeStatusMsg;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface CrudOrderService extends IService<OrderEntity> {
@@ -73,4 +74,6 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param msgList 退款消息
      */
     void updateRefundInfo(List<TradeStatusMsg> msgList);
+
+    List<OrderEntity> findByMemberId(Long memberId);
 }

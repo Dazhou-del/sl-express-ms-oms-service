@@ -61,9 +61,7 @@ public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCa
 
     @Override
     public List<OrderCargoDTO> listRecent(String name, Long memberId) {
-        OrderEntity orderEntity = new OrderEntity();
-        orderEntity.setMemberId(memberId);
-        List<Long> orderIds = crudOrderService.findByPage(1, 30, orderEntity).getRecords().parallelStream().map(OrderEntity::getId).collect(Collectors.toList());
+        List<Long> orderIds = crudOrderService.findByMemberId(memberId).parallelStream().map(OrderEntity::getId).collect(Collectors.toList());
         if (CollUtil.isEmpty(orderIds)) {
             return new ArrayList<>();
         }
