@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.map.MapUtil;
@@ -32,12 +33,15 @@ import com.sl.ms.oms.service.CrudOrderService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.ms.scope.api.ServiceScopeFeign;
 import com.sl.ms.scope.dto.ServiceScopeDTO;
+import com.sl.ms.transport.api.TransportLineFeign;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDTO;
+import com.sl.ms.work.domain.enums.WorkExceptionEnum;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
 import com.sl.transport.common.vo.OrderMsg;
+import com.sl.transport.domain.TransportLineNodeDTO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +84,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     @Resource
     private CarriageFeign carriageFeign;
 
+    @Resource
+    private TransportLineFeign transportLineFeign;
+
     /**
      * 下单
      * @param mailingSaveDTO 下单信息
@@ -96,13 +103,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         OrderEntity order = buildOrder(mailingSaveDTO, sendAddress, receiptAddress);
         log.info("订单信息入库:{}", order);
 
-        // 计算运费
-        CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
-        order.setAmount(BigDecimal.valueOf(carriageDTO.getExpense()));
-
         // 订单位置
         OrderLocationEntity orderLocation = buildOrderLocation(order);
         log.info("订单位置为：{}", orderLocation);
+
+        // 计算运费
+        CarriageDTO carriageDTO = computeCarriage(mailingSaveDTO, sendAddress.getCityId(), receiptAddress.getCityId());
+        order.setAmount(BigDecimal.valueOf(carriageDTO.getExpense()));
+        log.info("订单运费为：{}", carriageDTO);
 
         // 货物
         OrderCargoEntity orderCargo = buildOrderCargo(mailingSaveDTO);
@@ -393,20 +401,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
     private OrderLocationEntity buildOrderLocation(OrderEntity order) {
         String address = senderFullAddress(order);
         Result result = getAgencyId(address);
-        String agencyId = result.get("agencyId").toString();
+        String sendAgentId = result.get("agencyId").toString();
         String sendLocation = result.get("location").toString();
 
         String receiverAddress = receiverFullAddress(order);
         Result resultReceive = getAgencyId(receiverAddress);
-        String receiveAgencyId = resultReceive.get("agencyId").toString();
+        String receiveAgentId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
+
+        if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
+            //根据起始机构规划运输路线
+            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.findLowestPath(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
+            if (ObjectUtil.isEmpty(transportLineNodeDTO) || CollUtil.isEmpty(transportLineNodeDTO.getNodeList())) {
+                throw new SLException("暂不支持寄件收件地址，没有对应的路线");
+            }
+        }
 
         OrderLocationEntity orderLocationEntity = new OrderLocationEntity();
         orderLocationEntity.setOrderId(order.getId());
         orderLocationEntity.setSendLocation(sendLocation);
-        orderLocationEntity.setSendAgentId(Long.parseLong(agencyId));
+        orderLocationEntity.setSendAgentId(Long.parseLong(sendAgentId));
         orderLocationEntity.setReceiveLocation(receiveAgentLocation);
-        orderLocationEntity.setReceiveAgentId(Long.parseLong(receiveAgencyId));
+        orderLocationEntity.setReceiveAgentId(Long.parseLong(receiveAgentId));
         return orderLocationEntity;
     }
 
