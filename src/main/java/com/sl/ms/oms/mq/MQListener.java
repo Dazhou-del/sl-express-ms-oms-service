@@ -118,6 +118,9 @@ public class MQListener {
 
         // 只处理支付成功的
         List<TradeStatusMsg> msgList = tradeStatusMsgList.stream().filter(v -> v.getStatusCode().equals(TradingStateEnum.YJS.getCode())).collect(Collectors.toList());
+        if (CollUtil.isEmpty(msgList)) {
+            return;
+        }
         this.crudOrderService.updatePayStatus(msgList.stream().map(TradeStatusMsg::getProductOrderNo).collect(Collectors.toList()), OrderPaymentStatus.PAID.getStatus());
     }
 
