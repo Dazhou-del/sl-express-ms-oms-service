@@ -22,7 +22,6 @@
         <sl-express-mq.version>1.0-SNAPSHOT</sl-express-mq.version>
         <sl-express-ms-user-api.version>1.0-SNAPSHOT</sl-express-ms-user-api.version>
         <sl-express-ms-carriage-api.version>1.0-SNAPSHOT</sl-express-ms-carriage-api.version>
-        <sl-express-ms-transport-info-api.version>1.0-SNAPSHOT</sl-express-ms-transport-info-api.version>
         <sl-express-ms-transport-api.version>1.0-SNAPSHOT</sl-express-ms-transport-api.version>
         <sl-express-ms-trade-api.version>1.0-SNAPSHOT</sl-express-ms-trade-api.version>
         <sl-express-ms-work-api.version>1.0-SNAPSHOT</sl-express-ms-work-api.version>
@@ -58,11 +57,6 @@
             <groupId>com.sl-express.ms.carriage</groupId>
             <artifactId>sl-express-ms-carriage-api</artifactId>
             <version>${sl-express-ms-carriage-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sl.ms.transport.info</groupId>
-            <artifactId>sl-express-ms-transport-info-api</artifactId>
-            <version>${sl-express-ms-transport-info-api.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sl-express.ms.trade</groupId>
