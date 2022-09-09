@@ -36,7 +36,6 @@ import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.transport.api.TransportLineFeign;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDTO;
-import com.sl.ms.work.domain.enums.WorkExceptionEnum;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
@@ -411,7 +410,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
             //根据起始机构规划运输路线
-            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.findLowestPath(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
+            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.queryPathByDispatchMethod(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
             if (ObjectUtil.isEmpty(transportLineNodeDTO) || CollUtil.isEmpty(transportLineNodeDTO.getNodeList())) {
                 throw new SLException("暂不支持寄件收件地址，没有对应的路线");
             }
