@@ -36,6 +36,7 @@ import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.transport.api.TransportLineFeign;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDTO;
+import com.sl.ms.work.domain.enums.pickupDispatchtask.PickupDispatchTaskType;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
@@ -440,7 +441,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .created(LocalDateTimeUtil.toEpochMilli(orderEntity.getCreateTime()))
                 .estimatedEndTime(orderEntity.getEstimatedStartTime())
                 .mark(orderEntity.getMark())
-                .taskType(1)
+                .taskType(PickupDispatchTaskType.PICKUP.getCode())
                 .latitude(lat)
                 .longitude(lnt)
                 .agencyId(orderEntity.getCurrentAgencyId())
