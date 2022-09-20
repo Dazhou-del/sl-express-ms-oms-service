@@ -318,7 +318,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param entity 订单
      * @return 地址
      */
-    @SneakyThrows
     private String senderFullAddress(OrderEntity entity) {
         Long province = entity.getSenderProvinceId();
         Long city = entity.getSenderCityId();
@@ -335,7 +334,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param orderDTO 订单
      * @return 地址
      */
-    @SneakyThrows
     private String receiverFullAddress(OrderEntity orderDTO) {
         Long province = orderDTO.getReceiverProvinceId();
         Long city = orderDTO.getReceiverCityId();
