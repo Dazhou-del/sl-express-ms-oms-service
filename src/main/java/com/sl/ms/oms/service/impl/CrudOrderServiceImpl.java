@@ -143,19 +143,25 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
             lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
         }
-
-        lambdaQueryWrapper
-                .eq(StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
-                // 客户端根据收件人查询 不展示这些状态
-                .notIn(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
-
-        // 客户端不展示删除状态
+        // 不展示删除状态
         lambdaQueryWrapper.ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
 
-        // 客户端根据用户ID查询 或者用收件人手机号查询都可以
+        // 是否客户端查询
+        boolean isQueryByCustom = ObjectUtil.isNotEmpty(orderDTO.getMailType());
+
+        // 收件人手机号查询 客户端、管理端共用
+        lambdaQueryWrapper
+                .eq(StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
+                // 客户端非寄件列表 不展示这些状态
+                .notIn(isQueryByCustom && !MailType.SEND.getCode().equals(orderDTO.getMailType()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
+
+        // 客户端 寄件列表
+        lambdaQueryWrapper.eq(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.SEND.getCode().equals(orderDTO.getMailType())), OrderEntity::getMemberId, order.getMemberId());
+
+        // 客户端 混合列表 客户端根据用户ID查询 或者用收件人手机号查询都可以
         lambdaQueryWrapper.or()
-                .eq(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getMemberId, order.getMemberId())
-                .ne(ObjectUtil.isNotEmpty(order.getMemberId()), OrderEntity::getStatus, OrderStatus.DEL.getCode());
+                .eq(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType())), OrderEntity::getMemberId, order.getMemberId())
+                .ne(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType())), OrderEntity::getStatus, OrderStatus.DEL.getCode());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
