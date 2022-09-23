@@ -97,8 +97,7 @@ public class OrderController {
      */
     @PostMapping("/page")
     public PageResponse<OrderDTO> findByPage(@RequestBody OrderDTO orderDTO) {
-        OrderEntity orderEntity = BeanUtil.toBean(orderDTO, OrderEntity.class);
-        IPage<OrderEntity> orderIPage = crudOrderService.findByPage(orderDTO.getPage(), orderDTO.getPageSize(), orderEntity);
+        IPage<OrderEntity> orderIPage = crudOrderService.findByPage(orderDTO.getPage(), orderDTO.getPageSize(), orderDTO);
         List<OrderDTO> dtoList = new ArrayList<>();
         orderIPage.getRecords().forEach(order -> {
             dtoList.add(BeanUtil.toBean(order, OrderDTO.class));

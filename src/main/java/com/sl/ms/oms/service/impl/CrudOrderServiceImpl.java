@@ -1,5 +1,6 @@
 package com.sl.ms.oms.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sl.ms.oms.dto.OrderCargoDTO;
+import com.sl.ms.oms.dto.OrderDTO;
 import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
@@ -24,6 +26,8 @@ import com.sl.ms.oms.service.OrderCargoService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.user.api.MemberFeign;
 import com.sl.ms.user.domain.dto.MemberDTO;
+import com.sl.ms.work.api.TransportOrderFeign;
+import com.sl.ms.work.domain.dto.TransportOrderDTO;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,9 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     @Resource
     private MemberFeign memberFeign;
 
+    @Resource
+    private TransportOrderFeign transportOrderFeign;
+
     @Transactional
     @Override
     public void saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception {
@@ -76,9 +83,27 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     }
 
     @Override
-    public Page<OrderEntity> findByPage(Integer page, Integer pageSize, OrderEntity order) {
+    public Page<OrderEntity> findByPage(Integer page, Integer pageSize, OrderDTO orderDTO) {
+        OrderEntity order = BeanUtil.toBean(orderDTO, OrderEntity.class);
+
         Page<OrderEntity> iPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<OrderEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        // 运单号 订单号 客户端搜索
+        if (ObjectUtil.isNotEmpty(orderDTO.getKeyword())) {
+            List<Long> orderIds =  new ArrayList<>();
+            try {
+                TransportOrderDTO transportOrderDTO = transportOrderFeign.findById(orderDTO.getKeyword());
+                Long orderId = transportOrderDTO.getOrderId();
+                orderIds.add(orderId);
+            } catch (Exception ignored) {}
+
+            if (!ObjectUtil.isValidIfNumber(orderDTO.getKeyword())) {
+                orderIds.add(Long.valueOf(orderDTO.getKeyword()));
+            }
+            lambdaQueryWrapper.in(OrderEntity::getId, orderIds);
+        }
+
         if (ObjectUtil.isNotEmpty(order.getId())) {
             lambdaQueryWrapper.like(OrderEntity::getId, order.getId());
         }

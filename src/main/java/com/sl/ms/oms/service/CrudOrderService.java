@@ -2,6 +2,7 @@ package com.sl.ms.oms.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sl.ms.oms.dto.OrderDTO;
 import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.dto.OrderStatusCountDTO;
 import com.sl.ms.oms.entity.OrderCargoEntity;
@@ -9,7 +10,6 @@ import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.transport.common.vo.TradeStatusMsg;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface CrudOrderService extends IService<OrderEntity> {
@@ -31,7 +31,7 @@ public interface CrudOrderService extends IService<OrderEntity> {
      * @param order    查询条件
      * @return 订单分页数据
      */
-    IPage<OrderEntity> findByPage(Integer page, Integer pageSize, OrderEntity order);
+    IPage<OrderEntity> findByPage(Integer page, Integer pageSize, OrderDTO order);
 
     /**
      * 获取订单列表
