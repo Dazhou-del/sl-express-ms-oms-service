@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -101,7 +102,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             if (!ObjectUtil.isValidIfNumber(orderDTO.getKeyword())) {
                 orderIds.add(Long.valueOf(orderDTO.getKeyword()));
             }
-            lambdaQueryWrapper.in(OrderEntity::getId, orderIds);
+            lambdaQueryWrapper.in(CollUtil.isNotEmpty(orderIds), OrderEntity::getId, orderIds);
         }
 
         if (ObjectUtil.isNotEmpty(order.getId())) {
