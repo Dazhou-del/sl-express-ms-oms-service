@@ -157,6 +157,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         // 收件数量
         long count = count(Wrappers.<OrderEntity>lambdaQuery()
                 .eq(OrderEntity::getReceiverPhone, detail.getPhone())
+                .ne(OrderEntity::getStatus, OrderStatus.DEL.getCode())
+                .notIn(OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()))
         );
         OrderStatusCountDTO orderStatusCountDTO = new OrderStatusCountDTO();
         orderStatusCountDTO.setStatus(MailType.RECEIVE);
@@ -167,6 +169,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         // 寄件数量
         long sendCount = count(Wrappers.<OrderEntity>lambdaQuery()
                 .eq(OrderEntity::getMemberId, memberId)
+                .ne(OrderEntity::getStatus, OrderStatus.DEL.getCode())
+
         );
         OrderStatusCountDTO send = new OrderStatusCountDTO();
         send.setStatus(MailType.SEND);
