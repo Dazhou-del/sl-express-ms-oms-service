@@ -156,12 +156,12 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
                 .notIn(isQueryByCustom && !MailType.SEND.getCode().equals(orderDTO.getMailType()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
 
         // 客户端 寄件列表
-        lambdaQueryWrapper.eq(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.SEND.getCode().equals(orderDTO.getMailType())), OrderEntity::getMemberId, order.getMemberId());
+        lambdaQueryWrapper.eq(isQueryByCustom && MailType.SEND.getCode().equals(orderDTO.getMailType()), OrderEntity::getMemberId, order.getMemberId());
 
         // 客户端 混合列表 客户端根据用户ID查询 或者用收件人手机号查询都可以
         lambdaQueryWrapper.or()
-                .eq(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType())), OrderEntity::getMemberId, order.getMemberId())
-                .ne(ObjectUtil.isNotEmpty(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType())), OrderEntity::getStatus, OrderStatus.DEL.getCode());
+                .eq(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType()), OrderEntity::getMemberId, order.getMemberId())
+                .ne(isQueryByCustom && MailType.ALL.getCode().equals(orderDTO.getMailType()), OrderEntity::getStatus, OrderStatus.DEL.getCode());
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);
         return page(iPage, lambdaQueryWrapper);
     }
