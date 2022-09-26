@@ -1,6 +1,7 @@
 package com.sl.ms.oms.mq;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.json.JSONUtil;
 import com.sl.ms.oms.dto.OrderPickupDTO;
@@ -117,6 +118,9 @@ public class MQListener {
 
         // 只处理支付成功的
         List<TradeStatusMsg> msgList = tradeStatusMsgList.stream().filter(v -> v.getStatusCode().equals(TradingStateEnum.YJS.getCode())).collect(Collectors.toList());
+        if (CollUtil.isEmpty(msgList)) {
+            return;
+        }
         this.crudOrderService.updatePayStatus(msgList.stream().map(TradeStatusMsg::getProductOrderNo).collect(Collectors.toList()), OrderPaymentStatus.PAID.getStatus());
     }
 
@@ -136,6 +140,9 @@ public class MQListener {
 
         // 只处理需要退款的
         List<TradeStatusMsg> msgList = tradeStatusMsgList.stream().filter(v -> v.getStatusCode().equals(RefundStatusEnum.SUCCESS.getCode())).collect(Collectors.toList());
+        if (CollUtil.isEmpty(msgList)) {
+            return;
+        }
         this.crudOrderService.updateRefundInfo(msgList);
     }
 }

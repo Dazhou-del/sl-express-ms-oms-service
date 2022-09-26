@@ -36,7 +36,7 @@ import com.sl.ms.scope.dto.ServiceScopeDTO;
 import com.sl.ms.transport.api.TransportLineFeign;
 import com.sl.ms.user.api.AddressBookFeign;
 import com.sl.ms.user.domain.dto.AddressBookDTO;
-import com.sl.ms.work.domain.enums.WorkExceptionEnum;
+import com.sl.ms.work.domain.enums.pickupDispatchtask.PickupDispatchTaskType;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
@@ -318,7 +318,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param entity 订单
      * @return 地址
      */
-    @SneakyThrows
     private String senderFullAddress(OrderEntity entity) {
         Long province = entity.getSenderProvinceId();
         Long city = entity.getSenderCityId();
@@ -335,7 +334,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param orderDTO 订单
      * @return 地址
      */
-    @SneakyThrows
     private String receiverFullAddress(OrderEntity orderDTO) {
         Long province = orderDTO.getReceiverProvinceId();
         Long city = orderDTO.getReceiverCityId();
@@ -411,7 +409,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
 
         if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
             //根据起始机构规划运输路线
-            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.findLowestPath(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
+            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.queryPathByDispatchMethod(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
             if (ObjectUtil.isEmpty(transportLineNodeDTO) || CollUtil.isEmpty(transportLineNodeDTO.getNodeList())) {
                 throw new SLException("暂不支持寄件收件地址，没有对应的路线");
             }
@@ -441,7 +439,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .created(LocalDateTimeUtil.toEpochMilli(orderEntity.getCreateTime()))
                 .estimatedEndTime(orderEntity.getEstimatedStartTime())
                 .mark(orderEntity.getMark())
-                .taskType(1)
+                .taskType(PickupDispatchTaskType.PICKUP.getCode())
                 .latitude(lat)
                 .longitude(lnt)
                 .agencyId(orderEntity.getCurrentAgencyId())
