@@ -42,7 +42,6 @@ import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
 import com.sl.transport.common.vo.OrderMsg;
 import com.sl.transport.domain.TransportLineNodeDTO;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

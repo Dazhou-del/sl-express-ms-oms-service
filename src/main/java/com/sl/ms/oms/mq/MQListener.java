@@ -1,10 +1,8 @@
 package com.sl.ms.oms.mq;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.json.JSONUtil;
-import com.sl.ms.oms.dto.OrderPickupDTO;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.ms.oms.enums.OrderStatus;
 import com.sl.ms.oms.service.CrudOrderService;
@@ -14,7 +12,6 @@ import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
 import com.sl.ms.work.domain.enums.transportorder.TransportOrderStatus;
 import com.sl.transport.common.constant.Constants;
-import com.sl.transport.common.vo.CourierMsg;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import com.sl.transport.common.vo.TransportOrderStatusMsg;
 import lombok.extern.slf4j.Slf4j;
