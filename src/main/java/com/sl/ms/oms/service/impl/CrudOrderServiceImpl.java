@@ -29,6 +29,7 @@ import com.sl.ms.user.api.MemberFeign;
 import com.sl.ms.user.domain.dto.MemberDTO;
 import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
+import com.sl.transport.common.util.PageResponse;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -90,18 +91,27 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
         Page<OrderEntity> iPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<OrderEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
 
-        // 运单号 订单号 客户端搜索
+        // 客户端搜索
         if (ObjectUtil.isNotEmpty(orderDTO.getKeyword())) {
             List<Long> orderIds =  new ArrayList<>();
+            // 运单号
             try {
                 TransportOrderDTO transportOrderDTO = transportOrderFeign.findById(orderDTO.getKeyword());
                 Long orderId = transportOrderDTO.getOrderId();
                 orderIds.add(orderId);
             } catch (Exception ignored) {}
 
-            if (!ObjectUtil.isValidIfNumber(orderDTO.getKeyword())) {
+            // 订单号
+            if (NumberUtil.isLong(orderDTO.getKeyword())) {
                 orderIds.add(Long.valueOf(orderDTO.getKeyword()));
             }
+
+            // 搜索条件不满足
+            if (CollUtil.isEmpty(orderIds)) {
+                return iPage;
+            }
+
+            // 查询条件
             lambdaQueryWrapper.in(CollUtil.isNotEmpty(orderIds), OrderEntity::getId, orderIds);
         }
 
