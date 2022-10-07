@@ -129,7 +129,6 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
                 //收件人信息
                 .like(ObjectUtil.isNotEmpty(order.getReceiverName()), OrderEntity::getReceiverName, order.getReceiverName())
-                .like(StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
                 .eq(ObjectUtil.isNotEmpty(order.getReceiverProvinceId()), OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId())
                 .eq(ObjectUtil.isNotEmpty(order.getReceiverCityId()), OrderEntity::getReceiverCityId, order.getReceiverCityId())
                 .eq(ObjectUtil.isNotEmpty(order.getReceiverCountyId()), OrderEntity::getReceiverCountyId, order.getReceiverCountyId())
