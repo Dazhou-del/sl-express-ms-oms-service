@@ -160,7 +160,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
         // 收件人手机号查询 客户端、管理端共用
         lambdaQueryWrapper
-                .eq(StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
+                .eq(isQueryByCustom && StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
+                .like(!isQueryByCustom && StrUtil.isNotEmpty(order.getReceiverPhone()), OrderEntity::getReceiverPhone, order.getReceiverPhone())
                 // 客户端非寄件列表 不展示这些状态
                 .notIn(isQueryByCustom && !MailType.SEND.getCode().equals(orderDTO.getMailType()), OrderEntity::getStatus, Arrays.asList(OrderStatus.CLOSE.getCode(), OrderStatus.CANCELLED.getCode(), OrderStatus.PENDING.getCode()));
 
