@@ -92,13 +92,14 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
         // 客户端搜索
         if (ObjectUtil.isNotEmpty(orderDTO.getKeyword())) {
-            List<Long> orderIds =  new ArrayList<>();
+            List<Long> orderIds = new ArrayList<>();
             // 运单号
             try {
                 TransportOrderDTO transportOrderDTO = transportOrderFeign.findById(orderDTO.getKeyword());
                 Long orderId = transportOrderDTO.getOrderId();
                 orderIds.add(orderId);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             // 订单号
             if (NumberUtil.isLong(orderDTO.getKeyword())) {
@@ -114,46 +115,26 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             lambdaQueryWrapper.in(CollUtil.isNotEmpty(orderIds), OrderEntity::getId, orderIds);
         }
 
-        if (ObjectUtil.isNotEmpty(order.getId())) {
-            lambdaQueryWrapper.like(OrderEntity::getId, order.getId());
-        }
-        if (order.getStatus() != null) {
-            lambdaQueryWrapper.eq(OrderEntity::getStatus, order.getStatus());
-        }
-        if (order.getPaymentStatus() != null) {
-            lambdaQueryWrapper.eq(OrderEntity::getPaymentStatus, order.getPaymentStatus());
-        }
-        //发件人信息
-        if (ObjectUtil.isNotEmpty(order.getSenderName())) {
-            lambdaQueryWrapper.like(OrderEntity::getSenderName, order.getSenderName());
-        }
-        if (StrUtil.isNotEmpty(order.getSenderPhone())) {
-            lambdaQueryWrapper.like(OrderEntity::getSenderPhone, order.getSenderPhone());
-        }
-        if (ObjectUtil.isNotEmpty(order.getSenderProvinceId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getSenderProvinceId, order.getSenderProvinceId());
-        }
-        if (ObjectUtil.isNotEmpty(order.getSenderCityId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getSenderCityId, order.getSenderCityId());
-        }
-        if (ObjectUtil.isNotEmpty(order.getSenderCountyId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getSenderCountyId, order.getSenderCountyId());
-        }
-        //收件人信息
-        if (ObjectUtil.isNotEmpty(order.getReceiverName())) {
-            lambdaQueryWrapper.like(OrderEntity::getReceiverName, order.getReceiverName());
-        }
-        if (ObjectUtil.isNotEmpty(order.getReceiverProvinceId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId());
-        }
-        if (ObjectUtil.isNotEmpty(order.getReceiverCityId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getReceiverCityId, order.getReceiverCityId());
-        }
-        if (ObjectUtil.isNotEmpty(order.getReceiverCountyId())) {
-            lambdaQueryWrapper.eq(OrderEntity::getReceiverCountyId, order.getReceiverCountyId());
-        }
-        // 不展示删除状态
-        lambdaQueryWrapper.ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
+        lambdaQueryWrapper
+                .like(ObjectUtil.isNotEmpty(order.getId()), OrderEntity::getId, order.getId())
+                .eq(order.getStatus() != null, OrderEntity::getStatus, order.getStatus())
+                .eq(order.getPaymentStatus() != null, OrderEntity::getPaymentStatus, order.getPaymentStatus())
+
+                //发件人信息
+                .like(ObjectUtil.isNotEmpty(order.getSenderName()), OrderEntity::getSenderName, order.getSenderName())
+                .like(StrUtil.isNotEmpty(order.getSenderPhone()), OrderEntity::getSenderPhone, order.getSenderPhone())
+                .eq(ObjectUtil.isNotEmpty(order.getSenderProvinceId()), OrderEntity::getSenderProvinceId, order.getSenderProvinceId())
+                .eq(ObjectUtil.isNotEmpty(order.getSenderCityId()), OrderEntity::getSenderCityId, order.getSenderCityId())
+                .eq(ObjectUtil.isNotEmpty(order.getSenderCountyId()), OrderEntity::getSenderCountyId, order.getSenderCountyId())
+
+                //收件人信息
+                .like(ObjectUtil.isNotEmpty(order.getReceiverName()), OrderEntity::getReceiverName, order.getReceiverName())
+                .eq(ObjectUtil.isNotEmpty(order.getReceiverProvinceId()), OrderEntity::getReceiverProvinceId, order.getReceiverProvinceId())
+                .eq(ObjectUtil.isNotEmpty(order.getReceiverCityId()), OrderEntity::getReceiverCityId, order.getReceiverCityId())
+                .eq(ObjectUtil.isNotEmpty(order.getReceiverCountyId()), OrderEntity::getReceiverCountyId, order.getReceiverCountyId())
+
+                // 不展示删除状态
+                .ne(OrderEntity::getStatus, OrderStatus.DEL.getCode());
 
         // 是否客户端查询
         boolean isQueryByCustom = ObjectUtil.isNotEmpty(orderDTO.getMailType());
@@ -189,8 +170,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     /**
      * 统计各个状态的数量
      *
-     * @return 状态数量数据
      * @param memberId 用户ID
+     * @return 状态数量数据
      */
     @Override
     public List<OrderStatusCountDTO> groupByStatus(Long memberId) {
@@ -224,18 +205,20 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     /**
      * 状态更新
+     *
      * @param orderId 订单ID
-     * @param code 状态码
+     * @param code    状态码
      */
     @Override
     public void updateStatus(List<Long> orderId, Integer code) {
         update(Wrappers.<OrderEntity>lambdaUpdate()
                 .in(OrderEntity::getId, orderId)
-        .set(OrderEntity::getStatus, code));
+                .set(OrderEntity::getStatus, code));
     }
 
     /**
      * 快递员取件更新订单和货物信息
+     *
      * @param orderPickupDTO 订单和货物信息
      */
     @Transactional
@@ -267,7 +250,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     /**
      * 更新支付状态
-     * @param ids 订单ID
+     *
+     * @param ids    订单ID
      * @param status 状态
      */
     @Override
@@ -280,6 +264,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     /**
      * 退款成功
+     *
      * @param msgList 退款消息
      */
     @Override
