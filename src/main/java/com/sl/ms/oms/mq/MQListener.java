@@ -12,6 +12,7 @@ import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
 import com.sl.ms.work.domain.enums.transportorder.TransportOrderStatus;
 import com.sl.transport.common.constant.Constants;
+import com.sl.transport.common.util.ObjectUtil;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import com.sl.transport.common.vo.TransportOrderStatusMsg;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,10 @@ public class MQListener {
         log.info("接收到更新运单状态的消息 ({})-> {}", Constants.MQ.Queues.OMS_TRANSPORT_ORDER_UPDATE_STATUS, msg);
         TransportOrderStatusMsg transportOrderStatusMsg = JSONUtil.toBean(msg, TransportOrderStatusMsg.class);
         // 具体业务逻辑的处理
+        if (ObjectUtil.isEmpty(transportOrderStatusMsg.getStatusCode())) {
+            // 无状态值 不处理
+            return;
+        }
         Integer status = getOrderStatusByTransportOrderStatus(transportOrderStatusMsg.getStatusCode());
         List<TransportOrderDTO> list = transportOrderFeign.findByIds(transportOrderStatusMsg.getIdList().toArray(String[]::new));
         this.crudOrderService.updateStatus(list.stream().map(TransportOrderDTO::getOrderId).collect(Collectors.toList()), status);
