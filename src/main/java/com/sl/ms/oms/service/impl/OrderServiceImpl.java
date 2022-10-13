@@ -130,7 +130,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         orderDTO.setFirstWeight(carriageDTO.getFirstWeight());
         // 续重价格
         orderDTO.setContinuousWeight(carriageDTO.getContinuousWeight());
-        // 基础运费 todo 二期 目前只基础运费就是总价
         return orderDTO;
     }
 
