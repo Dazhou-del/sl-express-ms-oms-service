@@ -405,6 +405,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         String receiveAgentId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
+        // 线路规划逻辑耗时较长，影响下单接口响应时间 下单时暂不进行判断是否存在线路
 //        if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
 //            //根据起始机构规划运输路线
 //            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.queryPathByDispatchMethod(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
