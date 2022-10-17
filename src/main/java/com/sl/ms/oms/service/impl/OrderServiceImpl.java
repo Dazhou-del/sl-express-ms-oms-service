@@ -405,13 +405,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         String receiveAgentId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
-        if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
-            //根据起始机构规划运输路线
-            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.queryPathByDispatchMethod(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
-            if (ObjectUtil.isEmpty(transportLineNodeDTO) || CollUtil.isEmpty(transportLineNodeDTO.getNodeList())) {
-                throw new SLException("暂不支持寄件收件地址，没有对应的路线");
-            }
-        }
+//        if (ObjectUtil.notEqual(sendAgentId, receiveAgentId)) {
+//            //根据起始机构规划运输路线
+//            TransportLineNodeDTO transportLineNodeDTO = this.transportLineFeign.queryPathByDispatchMethod(Long.parseLong(sendAgentId), Long.parseLong(receiveAgentId));
+//            if (ObjectUtil.isEmpty(transportLineNodeDTO) || CollUtil.isEmpty(transportLineNodeDTO.getNodeList())) {
+//                throw new SLException("暂不支持寄件收件地址，没有对应的路线");
+//            }
+//        }
 
         OrderLocationEntity orderLocationEntity = new OrderLocationEntity();
         orderLocationEntity.setOrderId(order.getId());
