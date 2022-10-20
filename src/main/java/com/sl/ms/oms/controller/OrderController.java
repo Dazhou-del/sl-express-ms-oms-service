@@ -127,13 +127,13 @@ public class OrderController {
     }
 
     /**
-     * 根据id获取集合
+     * 根据ids获取集合
      *
-     * @param ids 订单Id
+     * @param ids 订单Ids
      * @return 订单详情
      */
     @GetMapping("ids")
-    public List<OrderDTO> findById(@RequestParam(name = "ids") List<Long> ids) {
+    public List<OrderDTO> findByIds(@RequestParam(name = "ids") List<Long> ids) {
         List<OrderEntity> orders = orderService.listByIds(ids);
         return orders.stream().map(item -> BeanUtil.toBean(item, OrderDTO.class))
                 .collect(Collectors.toList());
