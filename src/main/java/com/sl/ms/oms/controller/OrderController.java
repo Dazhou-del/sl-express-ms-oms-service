@@ -2,7 +2,6 @@ package com.sl.ms.oms.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -99,9 +98,7 @@ public class OrderController {
     public PageResponse<OrderDTO> findByPage(@RequestBody OrderDTO orderDTO) {
         IPage<OrderEntity> orderIPage = crudOrderService.findByPage(orderDTO.getPage(), orderDTO.getPageSize(), orderDTO);
         List<OrderDTO> dtoList = new ArrayList<>();
-        orderIPage.getRecords().forEach(order -> {
-            dtoList.add(BeanUtil.toBean(order, OrderDTO.class));
-        });
+        orderIPage.getRecords().forEach(order -> dtoList.add(BeanUtil.toBean(order, OrderDTO.class)));
 
         return PageResponse.<OrderDTO>builder()
                 .items(dtoList)
@@ -193,7 +190,7 @@ public class OrderController {
         QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
                 .in("order_id", orderIds);
         List<OrderLocationEntity> locationList = orderLocationService.list(queryWrapper);
-        if (CollectionUtil.isNotEmpty(locationList)) {
+        if (CollUtil.isNotEmpty(locationList)) {
             return locationList.stream().map(location -> {
                 OrderLocationDTO locationDTO = new OrderLocationDTO();
                 BeanUtil.copyProperties(location, locationDTO);

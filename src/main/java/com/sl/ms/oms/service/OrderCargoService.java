@@ -29,11 +29,18 @@ public interface OrderCargoService extends IService<OrderCargoEntity> {
      */
     List<OrderCargoEntity> findAll(Long tranOrderId, Long orderId);
 
+    /**
+     * 根据订单id查询货品信息
+     *
+     * @param id 订单id
+     * @return 货品信息
+     */
     OrderCargoDTO findByOrderId(Long id);
 
     /**
      * 最近寄递
-     * @param name 物品名称
+     *
+     * @param name     物品名称
      * @param memberId 用户ID
      * @return
      */
