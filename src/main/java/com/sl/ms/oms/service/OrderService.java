@@ -15,7 +15,7 @@ public interface OrderService extends IService<OrderEntity> {
      * 下单
      * @param mailingSaveDTO 下单信息
      * @return 下单成功信息
-     * @throws Exception
+     * @throws Exception 异常
      */
     OrderDTO mailingSave(MailingSaveDTO mailingSaveDTO) throws Exception;
 

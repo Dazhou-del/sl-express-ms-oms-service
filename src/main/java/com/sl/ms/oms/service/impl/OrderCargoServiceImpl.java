@@ -48,6 +48,12 @@ public class OrderCargoServiceImpl extends ServiceImpl<OrderCargoMapper, OrderCa
         return super.list(queryWrapper);
     }
 
+    /**
+     * 根据订单id查询货品信息
+     *
+     * @param id 订单id
+     * @return 货品信息
+     */
     @Override
     public OrderCargoDTO findByOrderId(Long id) {
         //构造查询条件

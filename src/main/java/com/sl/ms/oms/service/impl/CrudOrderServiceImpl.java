@@ -29,6 +29,7 @@ import com.sl.ms.user.api.MemberFeign;
 import com.sl.ms.user.domain.dto.MemberDTO;
 import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
+import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,7 +63,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
     @Transactional
     @Override
-    public void saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws Exception {
+    public void saveOrder(OrderEntity order, OrderCargoEntity orderCargo, OrderLocationEntity orderLocation) throws SLException {
         order.setCreateTime(LocalDateTime.now());
         order.setPaymentStatus(OrderPaymentStatus.UNPAID.getStatus());
         if (OrderPickupType.NO_PICKUP.getCode().equals(order.getPickupType())) {
@@ -80,7 +81,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
             orderLocationService.save(orderLocation);
             return;
         }
-        throw new Exception("保存订单失败");
+        throw new SLException("保存订单失败");
     }
 
     @Override
@@ -99,6 +100,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
                 Long orderId = transportOrderDTO.getOrderId();
                 orderIds.add(orderId);
             } catch (Exception ignored) {
+                log.info("Exception:{}", ignored.getMessage());
             }
 
             // 订单号
@@ -276,6 +278,12 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 //        update(updateWrapper);
     }
 
+    /**
+     * 根据用户id查询订单
+     *
+     * @param memberId 用户id
+     * @return 订单信息
+     */
     @Override
     public List<OrderEntity> findByMemberId(Long memberId) {
         return list(Wrappers.<OrderEntity>lambdaQuery().eq(OrderEntity::getMemberId, memberId));

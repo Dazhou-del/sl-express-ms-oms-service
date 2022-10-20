@@ -120,7 +120,7 @@ public class CargoController {
      * 批量查询货物信息表
      *
      * @param name 热门货品名称
-     * @return
+     * @return 货物信息表
      */
     @GetMapping("/hot")
     List<OrderCargoDTO> list(@RequestParam(name = "name", required = false) String name, Long memberId) {

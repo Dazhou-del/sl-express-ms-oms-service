@@ -9,17 +9,4 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface OrderCargoMapper extends BaseMapper<OrderCargoEntity> {
-
-    int deleteByPrimaryKey(String id);
-
-    int insertSelective(OrderCargoEntity record);
-
-    OrderCargoEntity selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(OrderCargoEntity record);
-
-    int updateByPrimaryKeyWithBLOBs(OrderCargoEntity record);
-
-    int updateByPrimaryKey(OrderCargoEntity record);
-
 }

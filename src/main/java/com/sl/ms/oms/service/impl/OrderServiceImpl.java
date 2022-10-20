@@ -1,7 +1,6 @@
 package com.sl.ms.oms.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.map.MapUtil;
@@ -41,7 +40,6 @@ import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
 import com.sl.transport.common.util.Result;
 import com.sl.transport.common.vo.OrderMsg;
-import com.sl.transport.domain.TransportLineNodeDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -348,7 +346,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      */
     private StringBuilder areaAddress(Long province, Long city, Long county) {
         StringBuilder stringBuffer = new StringBuilder();
-        Set<Long> areaIdSet = new HashSet<Long>();
+        Set<Long> areaIdSet = new HashSet<>();
         areaIdSet.add(province);
         areaIdSet.add(city);
         areaIdSet.add(county);

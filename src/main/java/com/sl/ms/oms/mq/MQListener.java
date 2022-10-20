@@ -2,6 +2,7 @@ package com.sl.ms.oms.mq;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.TypeReference;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.sl.ms.oms.enums.OrderPaymentStatus;
 import com.sl.ms.oms.enums.OrderStatus;
@@ -12,7 +13,6 @@ import com.sl.ms.work.api.TransportOrderFeign;
 import com.sl.ms.work.domain.dto.TransportOrderDTO;
 import com.sl.ms.work.domain.enums.transportorder.TransportOrderStatus;
 import com.sl.transport.common.constant.Constants;
-import com.sl.transport.common.util.ObjectUtil;
 import com.sl.transport.common.vo.TradeStatusMsg;
 import com.sl.transport.common.vo.TransportOrderStatusMsg;
 import lombok.extern.slf4j.Slf4j;
@@ -75,10 +75,6 @@ public class MQListener {
         if (TransportOrderStatus.ARRIVED_END.getCode().equals(statusCode)) {
             return OrderStatus.DISPATCHING.getCode();
         }
-//        // 已签收
-//        if (TransportOrderStatus.RECEIVED.getCode().equals(statusCode)) {
-//            return OrderStatus.RECEIVED.getCode();
-//        }
         // 已拒收
         if (TransportOrderStatus.REJECTED.getCode().equals(statusCode)) {
             return OrderStatus.REJECTION.getCode();
