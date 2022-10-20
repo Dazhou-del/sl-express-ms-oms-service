@@ -269,11 +269,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
      */
     @Override
     public void updateRefundInfo(List<TradeStatusMsg> msgList) {
-
-//        LambdaUpdateWrapper<OrderEntity> updateWrapper = Wrappers.<OrderEntity>lambdaUpdate()
-//                .set(OrderEntity::getRefund, )
-//                .in(OrderEntity::getId, msgList.stream().map(TradeStatusMsg::getProductOrderNo).collect(Collectors.toList()));
-//        update(updateWrapper);
+        // 退款功能暂不实现 涉及逻辑较多
     }
 
     @Override
