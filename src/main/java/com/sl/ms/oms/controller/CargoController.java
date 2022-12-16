@@ -31,7 +31,7 @@ public class CargoController {
      * @param orderId     订单id
      * @return 货物列表
      */
-    @GetMapping("")
+    @GetMapping
     public List<OrderCargoDTO> findAll(@RequestParam(name = "tranOrderId", required = false) Long tranOrderId,
                                        @RequestParam(name = "orderId", required = false) Long orderId) {
         log.info("oms --- 查询货物列表");
@@ -57,7 +57,7 @@ public class CargoController {
      * @param dto 货物信息
      * @return 货物信息
      */
-    @PostMapping("")
+    @PostMapping
     public OrderCargoDTO save(@RequestBody OrderCargoDTO dto) {
         log.info("保存货物信息：{}", dto);
         OrderCargoEntity orderCargo = BeanUtil.toBean(dto, OrderCargoEntity.class);
