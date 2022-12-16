@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderEntity extends BaseEntity {
+    private static final long serialVersionUID = 3686422248878046126L;
 
-    private static final long serialVersionUID = 1L;
     /**
      * 订单类型，1为同城订单，2为城际订单
      */
