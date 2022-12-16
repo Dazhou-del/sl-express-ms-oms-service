@@ -119,8 +119,8 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
 
         lambdaQueryWrapper
                 .like(ObjectUtil.isNotEmpty(order.getId()), OrderEntity::getId, order.getId())
-                .eq(order.getStatus() != null, OrderEntity::getStatus, order.getStatus())
-                .eq(order.getPaymentStatus() != null, OrderEntity::getPaymentStatus, order.getPaymentStatus())
+                .eq(ObjectUtil.isNotEmpty(order.getStatus()), OrderEntity::getStatus, order.getStatus())
+                .eq(ObjectUtil.isNotEmpty(order.getPaymentStatus()), OrderEntity::getPaymentStatus, order.getPaymentStatus())
 
                 //发件人信息
                 .like(ObjectUtil.isNotEmpty(order.getSenderName()), OrderEntity::getSenderName, order.getSenderName())
@@ -162,7 +162,7 @@ public class CrudOrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> 
     @Override
     public List<OrderEntity> findAll(List<Long> ids) {
         LambdaQueryWrapper<OrderEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        if (ids != null && ids.size() > 0) {
+        if (ObjectUtil.isNotEmpty(ids) && ids.size() > 0) {
             lambdaQueryWrapper.in(OrderEntity::getId, ids);
         }
         lambdaQueryWrapper.orderBy(true, false, OrderEntity::getCreateTime);

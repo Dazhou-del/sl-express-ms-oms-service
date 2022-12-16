@@ -117,7 +117,7 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderDTO findById(@PathVariable(name = "id") Long id) {
         OrderEntity orderEntity = orderService.getById(id);
-        if (orderEntity != null) {
+        if (ObjectUtil.isNotEmpty(orderEntity)) {
             return BeanUtil.toBean(orderEntity, OrderDTO.class);
         }
         return null;
@@ -145,18 +145,18 @@ public class OrderController {
     @PostMapping("list")
     public List<OrderDTO> list(@RequestBody OrderSearchDTO orderSearchDTO) {
         LambdaQueryWrapper<OrderEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(orderSearchDTO.getStatus() != null, OrderEntity::getStatus, orderSearchDTO.getStatus());
+        wrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getStatus()), OrderEntity::getStatus, orderSearchDTO.getStatus());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getReceiverCountyIds()), OrderEntity::getReceiverCountyId, orderSearchDTO.getReceiverCountyIds());
         wrapper.in(CollUtil.isNotEmpty(orderSearchDTO.getSenderCountyIds()), OrderEntity::getSenderCountyId, orderSearchDTO.getSenderCountyIds());
         wrapper.eq(ObjectUtil.isNotEmpty(orderSearchDTO.getCurrentAgencyId()), OrderEntity::getCurrentAgencyId, orderSearchDTO.getCurrentAgencyId());
 
         //快递员端进行条件查询取派件任务时，会传入关键词，作为订单id或姓名或手机号查询条件
         if (StringUtils.isNotBlank(orderSearchDTO.getKeyword())) {
-            wrapper.like(orderSearchDTO.getOrderId() != null, OrderEntity::getId, orderSearchDTO.getKeyword())
-                    .or().like(orderSearchDTO.getSenderName() != null, OrderEntity::getSenderName, orderSearchDTO.getSenderName())
-                    .or().like(orderSearchDTO.getSenderPhone() != null, OrderEntity::getSenderPhone, orderSearchDTO.getSenderPhone())
-                    .or().like(orderSearchDTO.getReceiverName() != null, OrderEntity::getReceiverName, orderSearchDTO.getReceiverName())
-                    .or().like(orderSearchDTO.getReceiverPhone() != null, OrderEntity::getReceiverPhone, orderSearchDTO.getReceiverPhone());
+            wrapper.like(ObjectUtil.isNotEmpty(orderSearchDTO.getOrderId()), OrderEntity::getId, orderSearchDTO.getKeyword())
+                    .or().like(ObjectUtil.isNotEmpty(orderSearchDTO.getSenderName()), OrderEntity::getSenderName, orderSearchDTO.getSenderName())
+                    .or().like(ObjectUtil.isNotEmpty(orderSearchDTO.getSenderPhone()), OrderEntity::getSenderPhone, orderSearchDTO.getSenderPhone())
+                    .or().like(ObjectUtil.isNotEmpty(orderSearchDTO.getReceiverName()), OrderEntity::getReceiverName, orderSearchDTO.getReceiverName())
+                    .or().like(ObjectUtil.isNotEmpty(orderSearchDTO.getReceiverPhone()), OrderEntity::getReceiverPhone, orderSearchDTO.getReceiverPhone());
         }
         return orderService.list(wrapper).stream().map(order -> BeanUtil.toBean(order, OrderDTO.class)).collect(Collectors.toList());
     }
@@ -173,7 +173,7 @@ public class OrderController {
         QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
                 .eq("order_id", orderId).last(" limit 1");
         OrderLocationEntity location = orderLocationService.getOne(queryWrapper);
-        if (location != null) {
+        if (ObjectUtil.isNotEmpty(location)) {
             BeanUtil.copyProperties(location, result);
         }
         return result;
