@@ -38,7 +38,6 @@ import com.sl.ms.user.domain.dto.AddressBookDTO;
 import com.sl.ms.work.domain.enums.pickupDispatchtask.PickupDispatchTaskType;
 import com.sl.transport.common.constant.Constants;
 import com.sl.transport.common.exception.SLException;
-import com.sl.transport.common.util.Result;
 import com.sl.transport.common.vo.OrderMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -276,7 +275,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      * @param address 地址
      * @return
      */
-    private Result getAgencyId(String address) throws SLException {
+    private HashMap getAgencyId(String address) throws SLException {
 
         if (ObjectUtil.isEmpty(address)) {
             log.error("地址不能为空");
@@ -303,7 +302,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
             log.error("地址不在服务范围");
             throw new SLException("地址不在服务范围");
         }
-        Result result = new Result();
+        HashMap result = new HashMap();
         result.put("agencyId", serviceScopeDTOS.get(0).getBid());
         result.put("location", location);
         return result;
@@ -393,12 +392,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
      */
     private OrderLocationEntity buildOrderLocation(OrderEntity order) {
         String address = senderFullAddress(order);
-        Result result = getAgencyId(address);
+        HashMap result = getAgencyId(address);
         String sendAgentId = result.get("agencyId").toString();
         String sendLocation = result.get("location").toString();
 
         String receiverAddress = receiverFullAddress(order);
-        Result resultReceive = getAgencyId(receiverAddress);
+        HashMap resultReceive = getAgencyId(receiverAddress);
         String receiveAgentId = resultReceive.get("agencyId").toString();
         String receiveAgentLocation = resultReceive.get("location").toString();
 
