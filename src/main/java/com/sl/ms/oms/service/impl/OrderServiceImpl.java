@@ -183,8 +183,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
                 .measureHigh(mailingSaveDTO.getMeasureHigh())
                 .measureLong(mailingSaveDTO.getMeasureLong())
                 .measureWidth(mailingSaveDTO.getMeasureWidth())
-                .volume(ObjectUtil.isEmpty(mailingSaveDTO.getTotalVolume()) ? null : mailingSaveDTO.getTotalVolume().toBigInteger().intValue())
-                .weight(mailingSaveDTO.getTotalWeight().toBigInteger().doubleValue())
+                .volume(ObjectUtil.isEmpty(mailingSaveDTO.getTotalVolume()) ? null : mailingSaveDTO.getTotalVolume().intValue())
+                .weight(mailingSaveDTO.getTotalWeight().doubleValue())
                 .build();
 
         CarriageDTO compute = carriageFeign.compute(waybillDTO);
