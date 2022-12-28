@@ -350,7 +350,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, OrderEntity> impl
         areaIdSet.add(city);
         areaIdSet.add(county);
 
-        List<AreaDto> result = areaFeign.findAll(null, new ArrayList<>(areaIdSet));
+        List<AreaDto> result = areaFeign.findBatch(new ArrayList<>(areaIdSet));
         Map<Long, AreaDto> areaMap = result.stream().collect(Collectors.toMap(AreaDto::getId, vo -> vo));
 
         stringBuffer.append(areaMap.get(province).getName());

@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.sl-express.ms.base</groupId>
             <artifactId>sl-express-ms-base-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.sl-express.ms.service-scope</groupId>
