@@ -1,6 +1,7 @@
 package com.sl.ms.oms.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.sl.ms.oms.dto.OrderLocationDTO;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 
 /**
@@ -8,4 +9,5 @@ import com.sl.ms.oms.entity.OrderLocationEntity;
  */
 public interface OrderLocationService extends IService<OrderLocationEntity> {
 
+    OrderLocationDTO findOrderLocationByOrderId(Long orderId);
 }

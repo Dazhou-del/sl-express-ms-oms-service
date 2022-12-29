@@ -42,6 +42,7 @@ public class OrderController {
     @Resource
     private CrudOrderService crudOrderService;
 
+
     /**
      * 下单
      *
@@ -124,6 +125,25 @@ public class OrderController {
     }
 
     /**
+     * 根据id获取订单详情
+     *
+     * @param id 订单Id
+     * @return 订单详情
+     */
+    @GetMapping("/{detail}")
+    public OrderDetailDTO findDetailByOrderId(@PathVariable(name = "id") Long id) {
+        OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
+        OrderEntity orderEntity = orderService.getById(id);
+        if (ObjectUtil.isNotEmpty(orderEntity)) {
+            OrderDTO orderDTO = BeanUtil.toBean(orderEntity, OrderDTO.class);
+            orderDetailDTO.setOrderDTO(orderDTO);
+        }
+        OrderLocationDTO orderLocationByOrderId = orderLocationService.findOrderLocationByOrderId(id);
+        orderDetailDTO.setOrderLocationDTO(orderLocationByOrderId);
+        return orderDetailDTO;
+    }
+
+    /**
      * 根据ids获取集合
      *
      * @param ids 订单Ids
@@ -169,14 +189,7 @@ public class OrderController {
      */
     @GetMapping("location/{orderId}")
     public OrderLocationDTO findOrderLocationByOrderId(@PathVariable(name = "orderId") Long orderId) {
-        OrderLocationDTO result = new OrderLocationDTO();
-        QueryWrapper<OrderLocationEntity> queryWrapper = new QueryWrapper<OrderLocationEntity>()
-                .eq("order_id", orderId).last(" limit 1");
-        OrderLocationEntity location = orderLocationService.getOne(queryWrapper);
-        if (ObjectUtil.isNotEmpty(location)) {
-            BeanUtil.copyProperties(location, result);
-        }
-        return result;
+        return orderLocationService.findOrderLocationByOrderId(orderId);
     }
 
     /**
