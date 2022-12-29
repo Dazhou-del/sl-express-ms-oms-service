@@ -130,7 +130,7 @@ public class OrderController {
      * @param id 订单Id
      * @return 订单详情
      */
-    @GetMapping("/{detail}")
+    @GetMapping("detail/{id}")
     public OrderDetailDTO findDetailByOrderId(@PathVariable(name = "id") Long id) {
         OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
         OrderEntity orderEntity = orderService.getById(id);
