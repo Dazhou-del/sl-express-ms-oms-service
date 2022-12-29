@@ -36,7 +36,6 @@ public class CargoController {
                                        @RequestParam(name = "orderId", required = false) Long orderId) {
         log.info("oms --- 查询货物列表");
         return orderCargoService.findAll(tranOrderId, orderId).stream().map(orderCargo -> {
-            log.info("oms ---  orderCargoService.findAll  result:{}", orderCargo);
             return BeanUtil.toBean(orderCargo, OrderCargoDTO.class);
         }).collect(Collectors.toList());
     }
