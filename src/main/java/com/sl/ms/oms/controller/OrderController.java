@@ -11,6 +11,7 @@ import com.sl.ms.oms.dto.*;
 import com.sl.ms.oms.entity.OrderEntity;
 import com.sl.ms.oms.entity.OrderLocationEntity;
 import com.sl.ms.oms.service.CrudOrderService;
+import com.sl.ms.oms.service.OrderCargoService;
 import com.sl.ms.oms.service.OrderLocationService;
 import com.sl.ms.oms.service.OrderService;
 import com.sl.transport.common.util.PageResponse;
@@ -41,6 +42,9 @@ public class OrderController {
 
     @Resource
     private CrudOrderService crudOrderService;
+
+    @Resource
+    private OrderCargoService orderCargoService;
 
 
     /**
@@ -134,12 +138,15 @@ public class OrderController {
     public OrderDetailDTO findDetailByOrderId(@PathVariable(name = "id") Long id) {
         OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
         OrderEntity orderEntity = orderService.getById(id);
-        if (ObjectUtil.isNotEmpty(orderEntity)) {
-            OrderDTO orderDTO = BeanUtil.toBean(orderEntity, OrderDTO.class);
-            orderDetailDTO.setOrderDTO(orderDTO);
+        if (ObjectUtil.isEmpty(orderEntity)) {
+           return null;
         }
+        OrderDTO orderDTO = BeanUtil.toBean(orderEntity, OrderDTO.class);
+        orderDetailDTO.setOrderDTO(orderDTO);
         OrderLocationDTO orderLocationByOrderId = orderLocationService.findOrderLocationByOrderId(id);
         orderDetailDTO.setOrderLocationDTO(orderLocationByOrderId);
+        OrderCargoDTO orderCargoDTO = orderCargoService.findByOrderId(id);
+        orderDetailDTO.getOrderDTO().setOrderCargoDto(orderCargoDTO);
         return orderDetailDTO;
     }
 
