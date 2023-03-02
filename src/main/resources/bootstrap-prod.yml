@@ -9,7 +9,7 @@ spring:
   cloud:
     nacos:
       username: nacos
-      password: nacos
+      password: vO5/dZ9,iL
       server-addr: nacos-service.yjy-public-slwl-java-prod.svc.cluster.local:8848
       discovery:
         namespace: 92312ba8-1119-440f-81af-c29618df303b
